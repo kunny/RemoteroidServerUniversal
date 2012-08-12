@@ -20,7 +20,7 @@ public class Account{
 	private String password;
 	
 	/**
-	 * Default constructor for Account
+	 * Default constructor for <code>Account</code>
 	 */
 	public Account(){
 		

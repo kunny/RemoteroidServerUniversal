@@ -28,7 +28,7 @@ public class Device{
 	private String deviceUUID;
 	
 	/**
-	 * Default constructor for Device
+	 * Default constructor for <code>Device</code>
 	 */
 	public Device(){
 		
