@@ -1,23 +1,27 @@
 package org.secmem.remoteroid.server.net;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.eclipse.swt.graphics.ImageData;
+import org.secmem.remoteroid.lib.Packet;
+
 public class ScreenReceiver {
 	
-	private static final int PORT = 55000;
+	private static final int PORT = 20000;
 	
-	public void startListeningClientConnection(ClientAcceptListener listener){
-		new AcceptClientThread(listener).start();
+	public void startReceivingImage(ImageReceiveListener listener){
+		new ReceiveImageThread(listener).start();
 	}
 	
-	private class AcceptClientThread extends Thread{
+	private class ReceiveImageThread extends Thread{
 
-		private ClientAcceptListener listener;
+		private ImageReceiveListener listener;
 		
-		public AcceptClientThread(ClientAcceptListener listener){
+		public ReceiveImageThread(ImageReceiveListener listener){
 			if(listener==null)
 				throw new IllegalArgumentException("Listener cannot be null");
 			this.listener = listener;
@@ -27,7 +31,9 @@ public class ScreenReceiver {
 		public void run() {
 			try{
 				// Start listening client connection
-				Socket clientSocket = new ServerSocket(PORT).accept();
+				System.out.println("Waiting for connection..");
+				
+				Socket clientSocket = new ServerSocket(4010).accept();
 				
 				// Get inputstream of connected socket
 				ObjectInputStream inStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -37,8 +43,8 @@ public class ScreenReceiver {
 				
 				// Start listening data from client
 				while(true){
-					Object data = inStream.readObject();
-					
+					Packet data = (Packet)inStream.readObject();
+					listener.onReceiveImageData(data.getImageBytes());
 				}
 			}catch(IOException e){
 				e.printStackTrace();
@@ -50,8 +56,9 @@ public class ScreenReceiver {
 		
 	}
 	
-	public interface ClientAcceptListener{
+	public interface ImageReceiveListener{
 		public void onClientConnected(String clientIpAddress);
+		public void onReceiveImageData(byte[] image);
 		public void onInterrupt();
 	}
 }
