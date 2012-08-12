@@ -1,26 +1,59 @@
 package org.secmem.remoteroid.lib.data;
 
+/**
+ * Contains data represents each account.
+ * @author Taeho Kim
+ *
+ */
 public class Account{
 
+	/**
+	 * User's E-mail address.<br/>
+	 * Used to identify each user, hence this should not be duplicated.
+	 */
 	private String email;
+	
+	/**
+	 * User's password.<br/>
+	 * May contain raw password or hashed one for security.
+	 */
 	private String password;
 	
+	/**
+	 * Default constructor for Account
+	 */
 	public Account(){
 		
 	}
 
+	/**
+	 * Returns user's E-mail address.
+	 * @return an E-mail address
+	 */
 	public String getEmail() {
 		return email;
 	}
 
+	/**
+	 * Set user's E-mail address.
+	 * @param email an E-mail address
+	 */
 	public void setEmail(String email) {
 		this.email = email;
 	}
 
+	/**
+	 * Return user's password
+	 * @return raw password if this object is made in Login procedure, hashed password otherwise.
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * Set user's password
+	 * @param password a password
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
