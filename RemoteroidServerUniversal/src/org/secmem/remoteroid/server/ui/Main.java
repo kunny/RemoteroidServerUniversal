@@ -1,47 +1,45 @@
 package org.secmem.remoteroid.server.ui;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.secmem.remoteroid.server.net.CommandReceiverThread;
 import org.secmem.remoteroid.server.net.ScreenReceiver;
 import org.secmem.remoteroid.server.net.ScreenReceiver.ImageReceiveListener;
+import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
 
-public class Main extends ApplicationWindow{
+public class Main extends ApplicationWindow {
 	
-	private ScreenReceiver receiver;
-	private static Canvas canvas;
+	private ScreenReceiver screenReceiver;
+	private CommandReceiverThread cmdReceiver;
+	private static DeviceScreenCanvas canvas;
 	
 	private static ImageReceiveListener listener = new ImageReceiveListener(){
 
 		@Override
 		public void onClientConnected(String clientIpAddress) {
-			// TODO Auto-generated method stub
+			
 			
 		}
 
 		@Override
-		public void onReceiveImageData(byte[] image) {
-			ImageData data = new ImageData(new ByteArrayInputStream(image));
-			final Image img = new Image(Display.getDefault(), data);
-			System.out.print("Img="+img.getImageData().data);
+		public void onReceiveImageData(final byte[] image) {
+			
 			Display disp = Display.getDefault();
 			disp.syncExec(new Runnable(){
 				public void run(){
-					canvas.setBackgroundImage(img);
+					canvas.setImage(image);
 					canvas.redraw();
 				}
 			});
@@ -51,11 +49,14 @@ public class Main extends ApplicationWindow{
 
 		@Override
 		public void onInterrupt() {
-			// TODO Auto-generated method stub
+			
 			
 		}
 		
 	};
+	private Action menu_connection_login;
+	private Action menu_connection_logout;
+	private Action menu_connection_exit;
 
 	/**
 	 * Create the application window.
@@ -76,8 +77,9 @@ public class Main extends ApplicationWindow{
 	protected Control createContents(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		
-		canvas = new Canvas(container, SWT.NONE);
-		canvas.setBounds(10, 10, 415, 499);
+		canvas = new DeviceScreenCanvas(container, SWT.NONE);
+		canvas.setBounds(20, 10, 313, 503);
+		
 
 		return container;
 	}
@@ -87,6 +89,19 @@ public class Main extends ApplicationWindow{
 	 */
 	private void createActions() {
 		// Create the actions
+		{
+			menu_connection_login = new Action("Login") {
+			};
+		}
+		{
+			menu_connection_logout = new Action("Logout") {
+			};
+		}
+		{
+			menu_connection_exit = new Action("Exit") {
+			};
+		}
+		
 	}
 
 	/**
@@ -96,18 +111,17 @@ public class Main extends ApplicationWindow{
 	@Override
 	protected MenuManager createMenuManager() {
 		MenuManager menuManager = new MenuManager("menu");
+		{
+			MenuManager connection = new MenuManager("Connection");
+			menuManager.add(connection);
+			connection.add(menu_connection_login);
+			connection.add(menu_connection_logout);
+			connection.add(new Separator());
+			connection.add(menu_connection_exit);
+		}
 		return menuManager;
 	}
 
-	/**
-	 * Create the toolbar manager.
-	 * @return the toolbar manager
-	 */
-	@Override
-	protected ToolBarManager createToolBarManager(int style) {
-		ToolBarManager toolBarManager = new ToolBarManager(style);
-		return toolBarManager;
-	}
 
 	/**
 	 * Create the status line manager.
@@ -116,6 +130,7 @@ public class Main extends ApplicationWindow{
 	@Override
 	protected StatusLineManager createStatusLineManager() {
 		StatusLineManager statusLineManager = new StatusLineManager();
+		
 		return statusLineManager;
 	}
 
@@ -151,9 +166,6 @@ public class Main extends ApplicationWindow{
 			newShell.setText("Remoteroid - No connection");
 		}
 		
-		
-		receiver = new ScreenReceiver();
-		receiver.startReceivingImage(listener);
 	}
 
 	/**
@@ -161,7 +173,6 @@ public class Main extends ApplicationWindow{
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(435, 594);
+		return new Point(355, 631);
 	}
-
 }

@@ -1,20 +1,28 @@
 package org.secmem.remoteroid.server.net;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.eclipse.swt.graphics.ImageData;
-import org.secmem.remoteroid.lib.Packet;
+import org.secmem.remoteroid.lib.net.ImagePacket;
 
 public class ScreenReceiver {
 	
-	private static final int PORT = 20000;
+	private Socket socket;
 	
 	public void startReceivingImage(ImageReceiveListener listener){
 		new ReceiveImageThread(listener).start();
+	}
+	
+	public void stopReceivingImage(){
+		if(socket!=null){
+			try{
+				socket.close();
+			}catch(IOException e){
+			
+			}
+		}
 	}
 	
 	private class ReceiveImageThread extends Thread{
@@ -33,17 +41,17 @@ public class ScreenReceiver {
 				// Start listening client connection
 				System.out.println("Waiting for connection..");
 				
-				Socket clientSocket = new ServerSocket(4010).accept();
+				socket = new ServerSocket(ImagePacket.SOCKET_PORT).accept();
 				
 				// Get inputstream of connected socket
-				ObjectInputStream inStream = new ObjectInputStream(clientSocket.getInputStream());
+				ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 				
 				// Connected!
-				listener.onClientConnected(clientSocket.getInetAddress().getHostAddress());
+				listener.onClientConnected(socket.getInetAddress().getHostAddress());
 				
 				// Start listening data from client
 				while(true){
-					Packet data = (Packet)inStream.readObject();
+					ImagePacket data = (ImagePacket)inStream.readObject();
 					listener.onReceiveImageData(data.getImageBytes());
 				}
 			}catch(IOException e){
