@@ -9,15 +9,22 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wb.swt.SWTResourceManager;
 import org.secmem.remoteroid.server.net.CommandReceiverThread;
 import org.secmem.remoteroid.server.net.ScreenReceiver;
 import org.secmem.remoteroid.server.net.ScreenReceiver.ImageReceiveListener;
 import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Link;
 
 public class Main extends ApplicationWindow {
 	
@@ -57,6 +64,8 @@ public class Main extends ApplicationWindow {
 	private Action menu_connection_login;
 	private Action menu_connection_logout;
 	private Action menu_connection_exit;
+	private Text edtEmail;
+	private Text edtPassword;
 
 	/**
 	 * Create the application window.
@@ -76,9 +85,60 @@ public class Main extends ApplicationWindow {
 	@Override
 	protected Control createContents(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
+		container.setBackground(SWTResourceManager.getColor(40, 40, 40));
+		
+		Composite composite = new Composite(container, SWT.NONE);
+		composite.setBackground(SWTResourceManager.getColor(64, 64, 64));
+		
+		composite.setBounds(27, 24, 300, 527);
+		Image img = new Image(Display.getDefault(), "welcome.png");
+		
+		Label lblEmailAddress = new Label(composite, SWT.NONE);
+		lblEmailAddress.setLocation(35, 197);
+		lblEmailAddress.setSize(132, 14);
+		lblEmailAddress.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		lblEmailAddress.setText("E-mail address");
+		
+		Label lblPassword = new Label(composite, SWT.NONE);
+		lblPassword.setLocation(35, 244);
+		lblPassword.setSize(59, 14);
+		lblPassword.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		lblPassword.setText("Password");
+		
+		edtEmail = new Text(composite, SWT.BORDER);
+		edtEmail.setBounds(35, 218, 228, 19);
+		
+		edtPassword = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		edtPassword.setBounds(35, 264, 225, 19);
+		edtPassword.setText("");
+		
+		Button btnLogin = new Button(composite, SWT.NONE);
+		btnLogin.setEnabled(false);
+		btnLogin.setBounds(35, 294, 225, 37);
+		btnLogin.setText("Login");
+		
+		Canvas canvas_1 = new Canvas(composite, SWT.NONE);
+		canvas_1.setBounds(0, 0, 300, 270);
+		canvas_1.setBackgroundImage(img);
+		
+		Label label = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setBounds(35, 337, 225, 14);
+		
+		Button btnRegister = new Button(composite, SWT.NONE);
+		btnRegister.setBounds(35, 357, 107, 39);
+		btnRegister.setText("Register");
+		
+		Button btnSkipLogin = new Button(composite, SWT.NONE);
+		btnSkipLogin.setBounds(148, 357, 112, 39);
+		btnSkipLogin.setText("Skip login");
+		
+		
 		
 		canvas = new DeviceScreenCanvas(container, SWT.NONE);
-		canvas.setBounds(20, 10, 313, 503);
+		canvas.setSize(326, 545);
+		canvas.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
+
+		
 		
 
 		return container;
