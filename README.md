@@ -5,7 +5,7 @@ This project makes Remoteroid Server available on Mac, Linux, in addition to Win
 
 Remoteroid library for REST service clients
 =========
-* Version 1.0 [jar](https://raw.github.com/kunny/RemoteroidServerUniversal/master/binary/remoteroidlib_1.0.jar)
+* [Version 1.0 jar](https://raw.github.com/kunny/RemoteroidServerUniversal/master/binary/remoteroidlib_1.0.jar)
 
 About Remoteroid
 ------------------
