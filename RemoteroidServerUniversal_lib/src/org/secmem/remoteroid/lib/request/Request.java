@@ -126,6 +126,8 @@ public class Request {
 				return new Request().setRequest("/account/unregister", RequestType.POST);
 			case API.Device.ADD_DEVICE:
 				return new Request().setRequest("/device/register", RequestType.POST);
+			case API.Device.LIST_DEVICE:
+				return new Request().setRequest("/device/list", RequestType.POST);
 			case API.Device.UPDATE_DEVICE_INFO:
 				return new Request().setRequest("/device/update", RequestType.POST);
 			case API.Device.DELETE_DEVICE:
