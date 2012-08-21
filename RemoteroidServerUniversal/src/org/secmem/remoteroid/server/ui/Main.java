@@ -9,63 +9,37 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.secmem.remoteroid.server.net.CommandReceiverThread;
-import org.secmem.remoteroid.server.net.ScreenReceiver;
-import org.secmem.remoteroid.server.net.ScreenReceiver.ImageReceiveListener;
-import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
+import org.secmem.remoteroid.lib.net.CommandPacket;
+import org.secmem.remoteroid.server.net.ClientManager;
+import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
 
-public class Main extends ApplicationWindow {
+public class Main extends ApplicationWindow implements ClientManager.ClientStateListener{
 	
-	private ScreenReceiver screenReceiver;
-	private CommandReceiverThread cmdReceiver;
-	private static DeviceScreenCanvas canvas;
+	private static ClientManager clientManager;
+	private static DeviceScreenCanvas deviceScreenCanvas;	
 	
-	private static ImageReceiveListener listener = new ImageReceiveListener(){
-
-		@Override
-		public void onClientConnected(String clientIpAddress) {
-			
-			
-		}
-
-		@Override
-		public void onReceiveImageData(final byte[] image) {
-			
-			Display disp = Display.getDefault();
-			disp.syncExec(new Runnable(){
-				public void run(){
-					canvas.setImage(image);
-					canvas.redraw();
-				}
-			});
-			
-			
-		}
-
-		@Override
-		public void onInterrupt() {
-			
-			
-		}
-		
-	};
 	private Action menu_connection_login;
 	private Action menu_connection_logout;
 	private Action menu_connection_exit;
 	private Text edtEmail;
 	private Text edtPassword;
+	
+	private Composite cmpstLogin;
 
 	/**
 	 * Create the application window.
@@ -87,59 +61,72 @@ public class Main extends ApplicationWindow {
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setBackground(SWTResourceManager.getColor(40, 40, 40));
 		
-		Composite composite = new Composite(container, SWT.NONE);
-		composite.setBackground(SWTResourceManager.getColor(64, 64, 64));
+		cmpstLogin = new Composite(container, SWT.NONE);
+		cmpstLogin.setBackground(SWTResourceManager.getColor(64, 64, 64));
 		
-		composite.setBounds(27, 24, 300, 527);
+		cmpstLogin.setBounds(27, 24, 300, 527);
 		Image img = new Image(Display.getDefault(), "welcome.png");
 		
-		Label lblEmailAddress = new Label(composite, SWT.NONE);
+		Label lblEmailAddress = new Label(cmpstLogin, SWT.NONE);
 		lblEmailAddress.setLocation(35, 197);
 		lblEmailAddress.setSize(132, 14);
 		lblEmailAddress.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		lblEmailAddress.setText("E-mail address");
 		
-		Label lblPassword = new Label(composite, SWT.NONE);
+		Label lblPassword = new Label(cmpstLogin, SWT.NONE);
 		lblPassword.setLocation(35, 244);
 		lblPassword.setSize(59, 14);
 		lblPassword.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		lblPassword.setText("Password");
 		
-		edtEmail = new Text(composite, SWT.BORDER);
+		edtEmail = new Text(cmpstLogin, SWT.BORDER);
 		edtEmail.setBounds(35, 218, 228, 19);
 		
-		edtPassword = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		edtPassword = new Text(cmpstLogin, SWT.BORDER | SWT.PASSWORD);
 		edtPassword.setBounds(35, 264, 225, 19);
 		edtPassword.setText("");
 		
-		Button btnLogin = new Button(composite, SWT.NONE);
+		Button btnLogin = new Button(cmpstLogin, SWT.NONE);
+		btnLogin.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				// TODO process login
+			}
+		});
 		btnLogin.setEnabled(false);
 		btnLogin.setBounds(35, 294, 225, 37);
 		btnLogin.setText("Login");
 		
-		Canvas canvas_1 = new Canvas(composite, SWT.NONE);
+		Canvas canvas_1 = new Canvas(cmpstLogin, SWT.NONE);
 		canvas_1.setBounds(0, 0, 300, 270);
 		canvas_1.setBackgroundImage(img);
 		
-		Label label = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label label = new Label(cmpstLogin, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setBounds(35, 337, 225, 14);
 		
-		Button btnRegister = new Button(composite, SWT.NONE);
+		Button btnRegister = new Button(cmpstLogin, SWT.NONE);
 		btnRegister.setBounds(35, 357, 107, 39);
 		btnRegister.setText("Register");
 		
-		Button btnSkipLogin = new Button(composite, SWT.NONE);
+		Button btnSkipLogin = new Button(cmpstLogin, SWT.NONE);
+		btnSkipLogin.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				// Set Login composite to invisible
+				cmpstLogin.setVisible(false);
+				
+				// Listen incoming connections
+				clientManager.waitClientConnection();
+			}
+		});
 		btnSkipLogin.setBounds(148, 357, 112, 39);
 		btnSkipLogin.setText("Skip login");
 		
-		
-		
-		canvas = new DeviceScreenCanvas(container, SWT.NONE);
-		canvas.setSize(326, 545);
-		canvas.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
+		deviceScreenCanvas = new DeviceScreenCanvas(container, SWT.NONE);
+		deviceScreenCanvas.setSize(326, 545);
+		deviceScreenCanvas.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
 
-		
-		
+		clientManager = new ClientManager(this);
 
 		return container;
 	}
@@ -150,8 +137,9 @@ public class Main extends ApplicationWindow {
 	private void createActions() {
 		// Create the actions
 		{
-			menu_connection_login = new Action("Login") {
+			menu_connection_login = new Action("&Show login dialog\u2026") {
 			};
+			menu_connection_login.setAccelerator(SWT.COMMAND+'L');
 		}
 		{
 			menu_connection_logout = new Action("Logout") {
@@ -172,12 +160,13 @@ public class Main extends ApplicationWindow {
 	protected MenuManager createMenuManager() {
 		MenuManager menuManager = new MenuManager("menu");
 		{
-			MenuManager connection = new MenuManager("Connection");
+			MenuManager connection = new MenuManager("Session");
 			menuManager.add(connection);
 			connection.add(menu_connection_login);
 			connection.add(menu_connection_logout);
 			connection.add(new Separator());
 			connection.add(menu_connection_exit);
+			
 		}
 		return menuManager;
 	}
@@ -205,7 +194,13 @@ public class Main extends ApplicationWindow {
 			window.setBlockOnOpen(true);
 			
 			window.open();
-			Display.getCurrent().dispose();
+			
+			if(clientManager!=null)
+				clientManager.disconnect();
+			
+			Display disp = Display.getCurrent();
+			if(disp!=null)
+				disp.dispose();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -234,5 +229,34 @@ public class Main extends ApplicationWindow {
 	@Override
 	protected Point getInitialSize() {
 		return new Point(355, 631);
+	}
+
+	@Override
+	public void onConnected(String ipAddress) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReceiveCommand(CommandPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReceiveScreen(final byte[] image) {
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run(){
+				deviceScreenCanvas.setImage(image);
+			}
+		});
+		
+	}
+
+	@Override
+	public void onDisconnected() {
+		// TODO Auto-generated method stub
+		
 	}
 }

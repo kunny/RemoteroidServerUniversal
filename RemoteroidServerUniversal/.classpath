@@ -13,9 +13,9 @@
 	<classpathentry kind="lib" path="/eclipse/plugins/org.eclipse.jface.text_3.7.2.v20111213-1208.jar" sourcepath="/Users/kunny/eclipse/plugins/org.eclipse.jface.text_3.7.2.v20111213-1208.jar"/>
 	<classpathentry kind="lib" path="/eclipse/plugins/org.eclipse.ui.workbench_3.7.1.v20120104-1859.jar" sourcepath="/Users/kunny/eclipse/plugins/org.eclipse.ui.workbench_3.7.1.v20120104-1859.jar"/>
 	<classpathentry kind="lib" path="/eclipse/plugins/com.ibm.icu_4.4.2.v20110823.jar" sourcepath="/Users/kunny/eclipse/plugins/com.ibm.icu_4.4.2.v20110823.jar"/>
-	<classpathentry kind="lib" path="libs/remoteroiduniv.jar"/>
 	<classpathentry kind="lib" path="/eclipse/plugins/org.eclipse.ui.forms_3.5.101.v20111011-1919.jar"/>
 	<classpathentry kind="lib" path="/eclipse/plugins/org.eclipse.core.commands_3.6.0.I20110111-0800.jar"/>
 	<classpathentry kind="lib" path="libs/gson-1.7.1.jar"/>
+	<classpathentry kind="lib" path="libs/remoteroidlib_1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

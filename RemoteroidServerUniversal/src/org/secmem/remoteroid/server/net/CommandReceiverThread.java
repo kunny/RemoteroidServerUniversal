@@ -10,12 +10,18 @@ import org.secmem.remoteroid.lib.net.CommandPacket;
 import com.google.gson.Gson;
 
 public class CommandReceiverThread extends Thread {
-	private CommandReceiveListener listener;
+	private CommandStateListener listener;
+	private Socket socket;
 	
-	public CommandReceiverThread(CommandReceiveListener listener){
+	public CommandReceiverThread(CommandStateListener listener){
 		if(listener==null)
 			throw new IllegalArgumentException("Listener cannot be null");
 		this.listener = listener;
+	}
+	
+	public CommandReceiverThread setSocket(Socket socket){
+		this.socket = socket;
+		return this;
 	}
 	
 	public void run(){
@@ -36,14 +42,14 @@ public class CommandReceiverThread extends Thread {
 			}
 		}catch(IOException e){
 			e.printStackTrace();
-			listener.onDisconnected();
+			listener.onCommandSocketLost();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public interface CommandReceiveListener{
+	public interface CommandStateListener{
 		public void onReceiveCommand(CommandPacket packet);
-		public void onDisconnected();
+		public void onCommandSocketLost();
 	}
 }
