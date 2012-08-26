@@ -1,5 +1,8 @@
 package org.secmem.remoteroid.lib.data;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Contains data regarding Wake-up message(Remote connection) from server.
  * @author Taeho Kim
@@ -63,6 +66,15 @@ public class WakeupMessage {
 	 */
 	public void setServerIpAddress(String serverIpAddress) {
 		this.serverIpAddress = serverIpAddress;
+	}
+	
+	public static WakeupMessage fromJson(String jsonString) throws JSONException{
+		JSONObject json = new JSONObject(jsonString);
+		Device device = Device.fromJson(json.getJSONObject("device"));
+		WakeupMessage msg = new WakeupMessage();
+		msg.setDevice(device);
+		msg.setServerIpAddress(json.getString("serverIpAddress"));
+		return msg;
 	}
 	
 }

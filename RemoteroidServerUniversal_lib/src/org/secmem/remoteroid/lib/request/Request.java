@@ -8,6 +8,7 @@ import java.net.URL;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -19,9 +20,15 @@ import org.apache.http.params.HttpParams;
 import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.data.Device;
+import org.secmem.remoteroid.lib.data.WakeupMessage;
 
 import com.google.gson.Gson;
 
+/**
+ * Contains data needed to send request to the Remoteroid server.
+ * @author Taeho Kim
+ *
+ */
 public class Request {
 	private static final int TIMEOUT_IN_MILLIS = 5000;
 	public enum RequestType{GET, POST};
@@ -33,7 +40,7 @@ public class Request {
 	private Request(){
 	}
 	
-	public Request setRequest(String path, RequestType type){
+	private Request setRequest(String path, RequestType type){
 		if(requestPath==null || requestPath.equals("")){
 			throw new IllegalArgumentException("Request path cannot be null.");
 		}
@@ -46,22 +53,58 @@ public class Request {
 		return this;
 	}
 	
+	/**
+	 * Attach an {@link Account} type payload to this request.
+	 * @param account an Account object
+	 * @return this request
+	 */
 	public Request attachPayload(Account account){
 		this.payload = new Gson().toJson(account);
 		return this;
 	}
 	
+	/**
+	 * Attach a {@link Device} type payload to this request.
+	 * @param device a Device object
+	 * @return this request
+	 */
 	public Request attachPayload(Device device){
 		this.payload = new Gson().toJson(device);
 		return this;
 	}
 	
-	public String getResponse() throws MalformedURLException, IOException{
-		if(requestType.equals(RequestType.GET)){
-			return readRawData(openConnectionGET(requestPath));
-		}else{
-			return readRawData(openConnectionPOST(requestPath, payload));
+	/**
+	 * Attach a {@link WakeupMessage} type payload to this request.
+	 * @param msg a WakeupMessage object
+	 * @return this request
+	 */
+	public Request attachPayload(WakeupMessage msg){
+		this.payload = new Gson().toJson(msg);
+		return this;
+	}
+	
+	/**
+	 * Send a request to server
+	 * @return a Response
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	public Response sendRequest() throws MalformedURLException, IOException{
+		Response response = new Response();
+		try{
+			String respInString;
+			if(requestType.equals(RequestType.GET)){
+				respInString = readRawData(openConnectionGET(requestPath));
+			}else{
+				respInString = readRawData(openConnectionPOST(requestPath, payload));
+			}
+			response.parse(respInString);
+		}catch(ParseException e){
+			e.printStackTrace();
 		}
+		// If cannot parse the response, just return default Response.
+		// (Default result for Response is 'FAILED')
+		return response;
 	}
 	
 	private HttpEntity openConnectionGET(String path) throws IOException, MalformedURLException{
@@ -111,11 +154,23 @@ public class Request {
 		return builder.toString();
 	}
 	
+	/**
+	 * Provides construction of various {@link Request}.
+	 * @author Taeho Kim
+	 *
+	 */
 	public static class RequestFactory {
 		private RequestFactory(){
 			
 		}
 		
+		/**
+		 * Generate a new request.
+		 * @param request API code for request
+		 * @return a Request object
+		 * @see org.secmem.remoteroid.lib.api.API.Account Client APIs for Account
+		 * @see org.secmem.remoteroid.lib.api.API.Device Client APIs for Device
+		 */
 		public static Request getRequest(int request){
 			switch(request){
 			case API.Account.ADD_ACCOUNT:
@@ -134,6 +189,8 @@ public class Request {
 				return new Request().setRequest("/device/delete", RequestType.POST);
 			case API.Device.DELETE_ALL_USER_DEVICE:
 				return new Request().setRequest("/device/deleteAll", RequestType.POST);
+			case API.Wakeup.WAKE_UP:
+				return new Request().setRequest("/wakeup", RequestType.POST);
 			default:
 				throw new IllegalArgumentException();
 			}

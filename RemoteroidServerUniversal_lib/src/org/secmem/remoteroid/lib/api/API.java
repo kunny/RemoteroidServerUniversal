@@ -22,4 +22,8 @@ public class API {
 		public static final int DELETE_ALL_USER_DEVICE = 0x105;
 	}
 	
+	public static class Wakeup{
+		public static final int WAKE_UP = 0x201;
+	}
+	
 }

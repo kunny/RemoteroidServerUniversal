@@ -1,5 +1,8 @@
 package org.secmem.remoteroid.lib.data;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Contains data regarding each device.
  * @author Taeho Kim
@@ -97,5 +100,27 @@ public class Device{
 	public void setDeviceUUID(String deviceUUID) {
 		this.deviceUUID = deviceUUID;
 	}
+	
+	public static Device fromJson(String jsonString) throws JSONException{
+		JSONObject json = new JSONObject(jsonString);
+		Account ownerAccount = Account.fromJson(json.getJSONObject("ownerAccount"));
+		Device device = new Device();
+		device.setOwnerAccount(ownerAccount);
+		device.setNickname(json.getString("nickname"));
+		device.setRegistrationKey(json.getString("registrationKey"));
+		device.setDeviceUUID(json.getString("deviceUUID"));
+		return device;
+	}
+	
+	public static Device fromJson(JSONObject json) throws JSONException{
+		Account ownerAccount = Account.fromJson(json.getJSONObject("ownerAccount"));
+		Device device = new Device();
+		device.setOwnerAccount(ownerAccount);
+		device.setNickname(json.getString("nickname"));
+		device.setRegistrationKey(json.getString("registrationKey"));
+		device.setDeviceUUID(json.getString("deviceUUID"));
+		return device;
+	}
+	
 	
 }

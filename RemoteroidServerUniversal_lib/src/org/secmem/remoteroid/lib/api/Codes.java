@@ -22,6 +22,8 @@ package org.secmem.remoteroid.lib.api;
 
 public class Codes {
 	
+	public static final int NONE = -100;
+	
 	public static class Result{
 		public static final int OK = 0;
 		public static final int FAILED = -1;

@@ -1,5 +1,8 @@
 package org.secmem.remoteroid.lib.data;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Contains data represents each account.
  * @author Taeho Kim
@@ -61,6 +64,21 @@ public class Account{
 	@Override
 	public String toString(){
 		return "Account [email="+email+", password="+password+"]";
+	}
+	
+	public static Account fromJson(String jsonString) throws JSONException{
+		JSONObject json = new JSONObject(jsonString);
+		Account account = new Account();
+		account.setEmail(json.getString("email"));
+		account.setPassword(json.getString("password"));
+		return account;
+	}
+	
+	public static Account fromJson(JSONObject json) throws JSONException{
+		Account account = new Account();
+		account.setEmail(json.getString("email"));
+		account.setPassword(json.getString("password"));
+		return account;
 	}
 	
 }
