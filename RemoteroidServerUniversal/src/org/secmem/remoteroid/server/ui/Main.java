@@ -105,6 +105,14 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 		label.setBounds(35, 337, 225, 14);
 		
 		Button btnRegister = new Button(cmpstLogin, SWT.NONE);
+		btnRegister.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				
+				RegisterDialog dlg = new RegisterDialog(shell, SWT.DEFAULT);
+				dlg.open();
+			}
+		});
 		btnRegister.setBounds(35, 357, 107, 39);
 		btnRegister.setText("Register");
 		
@@ -206,6 +214,8 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 		}
 	}
 
+	private Shell shell;
+	
 	/**
 	 * Configure the shell.
 	 * @param newShell
@@ -213,6 +223,7 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
+		shell = newShell;
 		try{
 			InetAddress ip = InetAddress.getLocalHost();
 			newShell.setText("Remoteroid - "+ip.getHostAddress());
@@ -256,7 +267,6 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 
 	@Override
 	public void onDisconnected() {
-		// TODO Auto-generated method stub
 		
 	}
 }
