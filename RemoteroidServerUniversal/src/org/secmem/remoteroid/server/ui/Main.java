@@ -13,7 +13,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
@@ -23,6 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.net.CommandPacket;
 import org.secmem.remoteroid.server.net.ClientManager;
 import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
@@ -90,9 +90,11 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 			@Override
 			public void mouseUp(MouseEvent e) {
 				// TODO process login
+				WelcomeDialog wel = new WelcomeDialog(shell, SWT.DEFAULT);
+				wel.open();
 			}
 		});
-		btnLogin.setEnabled(false);
+		
 		btnLogin.setBounds(35, 294, 225, 37);
 		btnLogin.setText("Login");
 		
@@ -108,7 +110,11 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 			@Override
 			public void mouseUp(MouseEvent e) {
 				
-				RegisterDialog dlg = new RegisterDialog(shell, SWT.DEFAULT);
+				DeviceSelectionDialog dlg = new DeviceSelectionDialog(shell, SWT.NONE);
+				Account account = new Account();
+				account.setEmail("test@test.com");
+				account.setPassword("9d4e1e23bd5b727046a9e3b4b7db57bd8d6ee684");
+				dlg.setUserAccount(account);
 				dlg.open();
 			}
 		});

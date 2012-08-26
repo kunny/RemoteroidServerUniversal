@@ -3,8 +3,10 @@ package org.secmem.remoteroid.server.ui;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
@@ -12,6 +14,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -73,6 +76,12 @@ public class RegisterDialog extends Dialog {
 			return;
 		}
 		
+		if(!Pattern.matches("[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})", txtEmail.getText())){
+			lblStatus.setText("E-mail is not valid");
+			btnRegister.setEnabled(false);
+			return;
+		}
+		
 		if(txtPassword.getText().length()==0){
 			lblStatus.setText("Enter password");
 			btnRegister.setEnabled(false);
@@ -104,6 +113,11 @@ public class RegisterDialog extends Dialog {
 		shlRegister.setSize(306, 232);
 		shlRegister.setText("Register");
 		
+		Rectangle parent = getParent().getBounds();
+		shlRegister.setBounds((int)((double)(parent.width)/2+parent.x-153), 
+				(int)((double)(parent.height)/2+parent.y-116), 
+				306, 232);
+		
 		txtEmail = new Text(shlRegister, SWT.BORDER);
 		txtEmail.addKeyListener(new KeyAdapter() {
 			@Override
@@ -111,7 +125,7 @@ public class RegisterDialog extends Dialog {
 				refreshDialogState();
 			}
 		});
-		txtEmail.setBounds(10, 44, 286, 19);
+		txtEmail.setBounds(10, 44, 286, 22);
 		
 		Label lblEmailAddress = new Label(shlRegister, SWT.NONE);
 		lblEmailAddress.setBounds(10, 24, 122, 14);
@@ -128,7 +142,7 @@ public class RegisterDialog extends Dialog {
 				refreshDialogState();
 			}
 		});
-		txtPassword.setBounds(10, 89, 286, 19);
+		txtPassword.setBounds(10, 89, 286, 22);
 		
 		btnRegister = new Button(shlRegister, SWT.NONE);
 		btnRegister.addMouseListener(new MouseAdapter() {
@@ -200,7 +214,7 @@ public class RegisterDialog extends Dialog {
 		btnRegister.setText("Register");
 		
 		lblStatus = new Label(shlRegister, SWT.NONE);
-		lblStatus.setBounds(10, 174, 186, 14);
+		lblStatus.setBounds(10, 174, 186, 21);
 		lblStatus.setText("");
 		
 		Label lblVerifyPassword = new Label(shlRegister, SWT.NONE);
@@ -214,7 +228,7 @@ public class RegisterDialog extends Dialog {
 				refreshDialogState();
 			}
 		});
-		txtVerifyPassword.setBounds(10, 134, 286, 19);
+		txtVerifyPassword.setBounds(10, 134, 286, 22);
 
 	}
 }
