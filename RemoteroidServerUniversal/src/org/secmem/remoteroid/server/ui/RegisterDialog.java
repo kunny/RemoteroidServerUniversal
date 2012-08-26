@@ -1,7 +1,12 @@
 package org.secmem.remoteroid.server.ui;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -130,6 +135,36 @@ public class RegisterDialog extends Dialog {
 				account.setPassword(txtPassword.getText());
 				
 				final Request request = RequestFactory.getRequest(API.Account.ADD_ACCOUNT).attachPayload(account);
+				
+				
+				try {
+					new ProgressMonitorDialog(shlRegister).run(true, true, new IRunnableWithProgress(){
+
+						@Override
+						public void run(IProgressMonitor monitor)
+								throws InvocationTargetException,
+								InterruptedException {
+							try {
+								Response response = request.sendRequest();
+								if(response.isSucceed()){
+									
+								}else{
+									
+								}
+							} catch (MalformedURLException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						
+					});
+				} catch (InvocationTargetException ex) {
+					ex.printStackTrace();
+				} catch(InterruptedException ex){
+					ex.printStackTrace();
+				}
+				
 				
 				new Thread(new Runnable(){
 					public void run(){
