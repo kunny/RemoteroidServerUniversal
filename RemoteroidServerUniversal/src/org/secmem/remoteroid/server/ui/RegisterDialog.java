@@ -16,9 +16,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.secmem.remoteroid.lib.api.API;
+import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
 import org.secmem.remoteroid.lib.request.Request.RequestFactory;
@@ -53,7 +55,9 @@ public class RegisterDialog extends Dialog {
 		createContents();
 		shlRegister.open();
 		shlRegister.layout();
+		
 		Display display = getParent().getDisplay();
+		
 		while (!shlRegister.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
@@ -114,7 +118,7 @@ public class RegisterDialog extends Dialog {
 		lblEmailAddress.setText("E-mail address");
 		
 		lblPassword = new Label(shlRegister, SWT.NONE);
-		lblPassword.setBounds(10, 69, 59, 14);
+		lblPassword.setBounds(10, 69, 87, 14);
 		lblPassword.setText("Password");
 		
 		txtPassword = new Text(shlRegister, SWT.BORDER | SWT.PASSWORD);
@@ -130,12 +134,8 @@ public class RegisterDialog extends Dialog {
 		btnRegister.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				Account account = new Account();
-				account.setEmail(txtEmail.getText());
-				account.setPassword(txtPassword.getText());
-				
-				final Request request = RequestFactory.getRequest(API.Account.ADD_ACCOUNT).attachPayload(account);
-				
+				final String email = txtEmail.getText();
+				final String pass = txtPassword.getText();
 				
 				try {
 					new ProgressMonitorDialog(shlRegister).run(true, true, new IRunnableWithProgress(){
@@ -144,13 +144,41 @@ public class RegisterDialog extends Dialog {
 						public void run(IProgressMonitor monitor)
 								throws InvocationTargetException,
 								InterruptedException {
+							monitor.beginTask("Register in progres..", IProgressMonitor.UNKNOWN);
 							try {
-								Response response = request.sendRequest();
-								if(response.isSucceed()){
-									
-								}else{
-									
-								}
+								Account account = new Account();
+								account.setEmail(email);
+								account.setPassword(pass);
+								
+								Request request = RequestFactory.getRequest(API.Account.ADD_ACCOUNT).attachPayload(account);
+								request.attachPayload(account);
+								
+								final Response response = request.sendRequest();
+								
+								Display disp = getParent().getDisplay();
+								disp.syncExec(new Runnable(){
+									public void run(){
+										MessageBox messageBox = new MessageBox(shlRegister, SWT.ICON_INFORMATION | SWT.OK);
+										messageBox.setText("Remoteroid");
+										if(response.isSucceed()){
+											messageBox.setMessage("Account created.");
+											messageBox.open();
+											shlRegister.close();
+										}else{
+											switch(response.getErrorCode()){
+											case Codes.Error.Account.DUPLICATE_EMAIL:
+												messageBox.setMessage("An E-mail you requested already exists.");
+												break;
+												
+											case Codes.Error.GENERAL:
+												messageBox.setMessage("Failed to register new account.");
+												break;
+											}
+											messageBox.open();
+										}
+									}
+								});
+								
 							} catch (MalformedURLException e) {
 								e.printStackTrace();
 							} catch (IOException e) {
@@ -165,22 +193,6 @@ public class RegisterDialog extends Dialog {
 					ex.printStackTrace();
 				}
 				
-				
-				new Thread(new Runnable(){
-					public void run(){
-						try{
-							Response response = request.sendRequest();
-							if(response.isSucceed()){
-								System.out.println("OK");
-							}else{
-								System.out.println("Failed");
-							}
-						}catch(IOException e){
-							e.printStackTrace();
-						}
-					}
-				});
-				
 			}
 		});
 		btnRegister.setEnabled(false);
@@ -188,11 +200,11 @@ public class RegisterDialog extends Dialog {
 		btnRegister.setText("Register");
 		
 		lblStatus = new Label(shlRegister, SWT.NONE);
-		lblStatus.setBounds(10, 174, 59, 14);
+		lblStatus.setBounds(10, 174, 186, 14);
 		lblStatus.setText("");
 		
 		Label lblVerifyPassword = new Label(shlRegister, SWT.NONE);
-		lblVerifyPassword.setBounds(10, 114, 89, 14);
+		lblVerifyPassword.setBounds(10, 114, 138, 14);
 		lblVerifyPassword.setText("Verify Password");
 		
 		txtVerifyPassword = new Text(shlRegister, SWT.BORDER | SWT.PASSWORD);

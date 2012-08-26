@@ -17,5 +17,9 @@
 	<classpathentry kind="lib" path="/eclipse/plugins/org.eclipse.core.commands_3.6.0.I20110111-0800.jar"/>
 	<classpathentry kind="lib" path="libs/gson-1.7.1.jar"/>
 	<classpathentry kind="lib" path="libs/remoteroidlib_1.0.jar"/>
+	<classpathentry kind="lib" path="libs/httpclient-4.2.1.jar"/>
+	<classpathentry kind="lib" path="libs/httpcore-4.2.1.jar"/>
+	<classpathentry kind="lib" path="libs/json-org.jar"/>
+	<classpathentry kind="lib" path="libs/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
