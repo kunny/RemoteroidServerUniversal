@@ -41,10 +41,10 @@ public class Request {
 	}
 	
 	private Request setRequest(String path, RequestType type){
-		if(requestPath==null || requestPath.equals("")){
+		if(path==null || path.equals("")){
 			throw new IllegalArgumentException("Request path cannot be null.");
 		}
-		if(requestType==null){
+		if(type==null){
 			throw new IllegalStateException("You must set request type. (GET/POST)");
 		}
 		
