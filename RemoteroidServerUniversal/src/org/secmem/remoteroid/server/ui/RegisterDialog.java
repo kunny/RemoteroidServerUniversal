@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
@@ -28,6 +27,7 @@ import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
 import org.secmem.remoteroid.lib.request.Request.RequestFactory;
 import org.secmem.remoteroid.lib.request.Response;
+import org.secmem.remoteroid.server.R;
 
 public class RegisterDialog extends Dialog {
 
@@ -71,31 +71,31 @@ public class RegisterDialog extends Dialog {
 	
 	private void refreshDialogState(){
 		if(txtEmail.getText().length()==0){
-			lblStatus.setText("Enter E-mail address");
+			lblStatus.setText(R.getString("enter_email_address"));
 			btnRegister.setEnabled(false);
 			return;
 		}
 		
 		if(!Pattern.matches("[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})", txtEmail.getText())){
-			lblStatus.setText("E-mail is not valid");
+			lblStatus.setText(R.getString("enter_valid_email_address"));
 			btnRegister.setEnabled(false);
 			return;
 		}
 		
 		if(txtPassword.getText().length()==0){
-			lblStatus.setText("Enter password");
+			lblStatus.setText(R.getString("enter_password"));
 			btnRegister.setEnabled(false);
 			return;
 		}
 		
 		if(txtVerifyPassword.getText().length()==0){
-			lblStatus.setText("Verify password");
+			lblStatus.setText(R.getString("verify_password"));
 			btnRegister.setEnabled(false);
 			return;
 		}
 		
 		if(!txtPassword.getText().equals(txtVerifyPassword.getText())){
-			lblStatus.setText("Password does not matches");
+			lblStatus.setText(R.getString("password_does_not_matches"));
 			btnRegister.setEnabled(false);
 			return;
 		}
@@ -111,7 +111,7 @@ public class RegisterDialog extends Dialog {
 	private void createContents() {
 		shlRegister = new Shell(getParent(), SWT.DIALOG_TRIM);
 		shlRegister.setSize(306, 232);
-		shlRegister.setText("Register");
+		shlRegister.setText(R.getString("register"));
 		
 		Rectangle parent = getParent().getBounds();
 		shlRegister.setBounds((int)((double)(parent.width)/2+parent.x-153), 
@@ -129,11 +129,11 @@ public class RegisterDialog extends Dialog {
 		
 		Label lblEmailAddress = new Label(shlRegister, SWT.NONE);
 		lblEmailAddress.setBounds(10, 24, 122, 14);
-		lblEmailAddress.setText("E-mail address");
+		lblEmailAddress.setText(R.getString("email_short"));
 		
 		lblPassword = new Label(shlRegister, SWT.NONE);
 		lblPassword.setBounds(10, 69, 87, 14);
-		lblPassword.setText("Password");
+		lblPassword.setText(R.getString("password"));
 		
 		txtPassword = new Text(shlRegister, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.addKeyListener(new KeyAdapter() {
@@ -158,7 +158,7 @@ public class RegisterDialog extends Dialog {
 						public void run(IProgressMonitor monitor)
 								throws InvocationTargetException,
 								InterruptedException {
-							monitor.beginTask("Register in progres..", IProgressMonitor.UNKNOWN);
+							monitor.beginTask(R.getString("register_in_progress"), IProgressMonitor.UNKNOWN);
 							try {
 								Account account = new Account();
 								account.setEmail(email);
@@ -173,19 +173,19 @@ public class RegisterDialog extends Dialog {
 								disp.syncExec(new Runnable(){
 									public void run(){
 										MessageBox messageBox = new MessageBox(shlRegister, SWT.ICON_INFORMATION | SWT.OK);
-										messageBox.setText("Remoteroid");
+										messageBox.setText(R.getString("remoteroid"));
 										if(response.isSucceed()){
-											messageBox.setMessage("Account created.");
+											messageBox.setMessage(R.getString("account_created"));
 											messageBox.open();
 											shlRegister.close();
 										}else{
 											switch(response.getErrorCode()){
 											case Codes.Error.Account.DUPLICATE_EMAIL:
-												messageBox.setMessage("An E-mail you requested already exists.");
+												messageBox.setMessage(R.getString("email_duplicated"));
 												break;
 												
 											case Codes.Error.GENERAL:
-												messageBox.setMessage("Failed to register new account.");
+												messageBox.setMessage(R.getString("failed_to_register"));
 												break;
 											}
 											messageBox.open();
@@ -211,7 +211,7 @@ public class RegisterDialog extends Dialog {
 		});
 		btnRegister.setEnabled(false);
 		btnRegister.setBounds(202, 167, 94, 28);
-		btnRegister.setText("Register");
+		btnRegister.setText(R.getString("register"));
 		
 		lblStatus = new Label(shlRegister, SWT.NONE);
 		lblStatus.setBounds(10, 174, 186, 21);
@@ -219,7 +219,7 @@ public class RegisterDialog extends Dialog {
 		
 		Label lblVerifyPassword = new Label(shlRegister, SWT.NONE);
 		lblVerifyPassword.setBounds(10, 114, 138, 14);
-		lblVerifyPassword.setText("Verify Password");
+		lblVerifyPassword.setText(R.getString("verify_password"));
 		
 		txtVerifyPassword = new Text(shlRegister, SWT.BORDER | SWT.PASSWORD);
 		txtVerifyPassword.addKeyListener(new KeyAdapter() {

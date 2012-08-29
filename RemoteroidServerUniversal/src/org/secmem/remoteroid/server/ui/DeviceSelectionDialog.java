@@ -27,6 +27,7 @@ import org.secmem.remoteroid.lib.data.Device;
 import org.secmem.remoteroid.lib.request.Request;
 import org.secmem.remoteroid.lib.request.Request.RequestFactory;
 import org.secmem.remoteroid.lib.request.Response;
+import org.secmem.remoteroid.server.R;
 
 public class DeviceSelectionDialog extends Dialog {
 
@@ -40,8 +41,9 @@ public class DeviceSelectionDialog extends Dialog {
 	private Account account;
 	private ArrayList<Device> deviceList;
 	
-	public void setUserAccount(Account account){
+	public DeviceSelectionDialog setUserAccount(Account account){
 		this.account = account;
+		return this;
 	}
 
 	/**
@@ -79,7 +81,7 @@ public class DeviceSelectionDialog extends Dialog {
 	private void createContents() {
 		shlSelectDeviceTo = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shlSelectDeviceTo.setSize(420, 219);
-		shlSelectDeviceTo.setText("Select device to connect");
+		shlSelectDeviceTo.setText(R.getString("select_device_to_connect"));
 		
 		Rectangle parent = getParent().getBounds();
 		shlSelectDeviceTo.setBounds((int)((double)(parent.width)/2+parent.x-210), 
@@ -117,17 +119,17 @@ public class DeviceSelectionDialog extends Dialog {
 		
 		TableColumn tblclmnNickname = new TableColumn(tblDevices, SWT.NONE);
 		tblclmnNickname.setWidth(261);
-		tblclmnNickname.setText("Device name");
+		tblclmnNickname.setText(R.getString("device_name"));
 		
 		btnEdit = new Button(shlSelectDeviceTo, SWT.NONE);
 		btnEdit.setEnabled(false);
 		btnEdit.setBounds(308, 22, 94, 28);
-		btnEdit.setText("Edit...");
+		btnEdit.setText(R.getString("edit"));
 		
 		btnDelete = new Button(shlSelectDeviceTo, SWT.NONE);
 		btnDelete.setEnabled(false);
 		btnDelete.setBounds(308, 56, 94, 28);
-		btnDelete.setText("Delete...");
+		btnDelete.setText(R.getString("delete"));
 		
 		btnConnect = new Button(shlSelectDeviceTo, SWT.NONE);
 		btnConnect.addMouseListener(new MouseAdapter() {
@@ -144,7 +146,7 @@ public class DeviceSelectionDialog extends Dialog {
 		});
 		btnConnect.setEnabled(false);
 		btnConnect.setBounds(308, 144, 94, 28);
-		btnConnect.setText("Connect");
+		btnConnect.setText(R.getString("connect"));
 		
 		Button btnRefresh = new Button(shlSelectDeviceTo, SWT.NONE);
 		btnRefresh.addMouseListener(new MouseAdapter() {
@@ -154,7 +156,7 @@ public class DeviceSelectionDialog extends Dialog {
 			}
 		});
 		btnRefresh.setBounds(308, 90, 94, 28);
-		btnRefresh.setText("Refresh");
+		btnRefresh.setText(R.getString("refresh"));
 
 	}
 	
@@ -166,7 +168,7 @@ public class DeviceSelectionDialog extends Dialog {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Fetching device list..", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(R.getString("fetching_device_list"), IProgressMonitor.UNKNOWN);
 					try {
 						Request request = RequestFactory.getRequest(API.Device.LIST_DEVICE).attachPayload(account);
 						
@@ -192,15 +194,15 @@ public class DeviceSelectionDialog extends Dialog {
 								}else{
 									switch(response.getErrorCode()){
 									case Codes.Error.Account.AUTH_FAILED:
-										MessageDialog.openError(shlSelectDeviceTo, "Failed to fetch device list", "Failed to authenticate user.");
+										MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("failed_to_authenticate_user"));
 										break;
 										
 									case Codes.Error.Device.DEVICE_NOT_FOUND:
-										MessageDialog.openError(shlSelectDeviceTo, "Failed to fetch device list", "No device found.");
+										MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("no_device_found"));
 										break;
 										
 									case Codes.Error.GENERAL:
-										MessageDialog.openError(shlSelectDeviceTo, "Failed to fetch device list", "Unexpected error has occoured.");
+										MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("unexpected_error"));
 										break;
 									}
 									

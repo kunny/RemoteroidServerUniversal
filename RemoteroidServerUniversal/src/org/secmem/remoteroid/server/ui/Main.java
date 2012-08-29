@@ -1,250 +1,279 @@
 package org.secmem.remoteroid.server.ui;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.util.logging.Logger;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.action.StatusLineManager;
-import org.eclipse.jface.window.ApplicationWindow;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.wb.swt.SWTResourceManager;
+import org.secmem.remoteroid.lib.api.API;
+import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
+import org.secmem.remoteroid.lib.data.Device;
+import org.secmem.remoteroid.lib.data.WakeupMessage;
 import org.secmem.remoteroid.lib.net.CommandPacket;
+import org.secmem.remoteroid.lib.request.Request;
+import org.secmem.remoteroid.lib.request.Request.RequestFactory;
+import org.secmem.remoteroid.lib.request.Response;
+import org.secmem.remoteroid.server.R;
 import org.secmem.remoteroid.server.net.ClientManager;
 import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
 
-public class Main extends ApplicationWindow implements ClientManager.ClientStateListener{
+public class Main implements ClientManager.ClientStateListener{
+	
+	private static final Logger log = Logger.getLogger("Main");
+
+	protected Shell shell;
+	private DeviceScreenCanvas canvas;
 	
 	private static ClientManager clientManager;
-	private static DeviceScreenCanvas deviceScreenCanvas;	
+	private Device currentDevice;
+	private Account currentAccount;
+	private String currentIpAddress;
 	
-	private Action menu_connection_login;
-	private Action menu_connection_logout;
-	private Action menu_connection_exit;
-	private Text edtEmail;
-	private Text edtPassword;
-	
-	private Composite cmpstLogin;
-
-	/**
-	 * Create the application window.
-	 */
-	public Main() {
-		super(null);
-		createActions();
-		addToolBar(SWT.FLAT | SWT.WRAP);
-		addMenuBar();
-		addStatusLine();
-	}
-
-	/**
-	 * Create contents of the application window.
-	 * @param parent
-	 */
-	@Override
-	protected Control createContents(Composite parent) {
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setBackground(SWTResourceManager.getColor(40, 40, 40));
-		
-		cmpstLogin = new Composite(container, SWT.NONE);
-		cmpstLogin.setBackground(SWTResourceManager.getColor(64, 64, 64));
-		
-		cmpstLogin.setBounds(27, 24, 300, 527);
-		Image img = new Image(Display.getDefault(), "welcome.png");
-		
-		Label lblEmailAddress = new Label(cmpstLogin, SWT.NONE);
-		lblEmailAddress.setLocation(35, 197);
-		lblEmailAddress.setSize(132, 14);
-		lblEmailAddress.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		lblEmailAddress.setText("E-mail address");
-		
-		Label lblPassword = new Label(cmpstLogin, SWT.NONE);
-		lblPassword.setLocation(35, 244);
-		lblPassword.setSize(59, 14);
-		lblPassword.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		lblPassword.setText("Password");
-		
-		edtEmail = new Text(cmpstLogin, SWT.BORDER);
-		edtEmail.setBounds(35, 218, 228, 19);
-		
-		edtPassword = new Text(cmpstLogin, SWT.BORDER | SWT.PASSWORD);
-		edtPassword.setBounds(35, 264, 225, 19);
-		edtPassword.setText("");
-		
-		Button btnLogin = new Button(cmpstLogin, SWT.NONE);
-		btnLogin.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				// TODO process login
-				WelcomeDialog wel = new WelcomeDialog(shell, SWT.DEFAULT);
-				wel.open();
-			}
-		});
-		
-		btnLogin.setBounds(35, 294, 225, 37);
-		btnLogin.setText("Login");
-		
-		Canvas canvas_1 = new Canvas(cmpstLogin, SWT.NONE);
-		canvas_1.setBounds(0, 0, 300, 270);
-		canvas_1.setBackgroundImage(img);
-		
-		Label label = new Label(cmpstLogin, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setBounds(35, 337, 225, 14);
-		
-		Button btnRegister = new Button(cmpstLogin, SWT.NONE);
-		btnRegister.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				
-				DeviceSelectionDialog dlg = new DeviceSelectionDialog(shell, SWT.NONE);
-				Account account = new Account();
-				account.setEmail("test@test.com");
-				account.setPassword("9d4e1e23bd5b727046a9e3b4b7db57bd8d6ee684");
-				dlg.setUserAccount(account);
-				dlg.open();
-			}
-		});
-		btnRegister.setBounds(35, 357, 107, 39);
-		btnRegister.setText("Register");
-		
-		Button btnSkipLogin = new Button(cmpstLogin, SWT.NONE);
-		btnSkipLogin.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				// Set Login composite to invisible
-				cmpstLogin.setVisible(false);
-				
-				// Listen incoming connections
-				clientManager.waitClientConnection();
-			}
-		});
-		btnSkipLogin.setBounds(148, 357, 112, 39);
-		btnSkipLogin.setText("Skip login");
-		
-		deviceScreenCanvas = new DeviceScreenCanvas(container, SWT.NONE);
-		deviceScreenCanvas.setSize(326, 545);
-		deviceScreenCanvas.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
-
-		clientManager = new ClientManager(this);
-
-		return container;
-	}
-
-	/**
-	 * Create the actions.
-	 */
-	private void createActions() {
-		// Create the actions
-		{
-			menu_connection_login = new Action("&Show login dialog\u2026") {
-			};
-			menu_connection_login.setAccelerator(SWT.COMMAND+'L');
-		}
-		{
-			menu_connection_logout = new Action("Logout") {
-			};
-		}
-		{
-			menu_connection_exit = new Action("Exit") {
-			};
-		}
-		
-	}
-
-	/**
-	 * Create the menu manager.
-	 * @return the menu manager
-	 */
-	@Override
-	protected MenuManager createMenuManager() {
-		MenuManager menuManager = new MenuManager("menu");
-		{
-			MenuManager connection = new MenuManager("Session");
-			menuManager.add(connection);
-			connection.add(menu_connection_login);
-			connection.add(menu_connection_logout);
-			connection.add(new Separator());
-			connection.add(menu_connection_exit);
-			
-		}
-		return menuManager;
-	}
-
-
-	/**
-	 * Create the status line manager.
-	 * @return the status line manager
-	 */
-	@Override
-	protected StatusLineManager createStatusLineManager() {
-		StatusLineManager statusLineManager = new StatusLineManager();
-		
-		return statusLineManager;
-	}
+	private MenuItem accountMenuItem;
+	private MenuItem deviceMenuItem;
 
 	/**
 	 * Launch the application.
 	 * @param args
 	 */
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		try {
 			Main window = new Main();
-			Display.setAppName("Remoteroid");
-			window.setBlockOnOpen(true);
-			
 			window.open();
-			
-			if(clientManager!=null)
-				clientManager.disconnect();
-			
-			Display disp = Display.getCurrent();
-			if(disp!=null)
-				disp.dispose();
+			clientManager.disconnect();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private Shell shell;
-	
 	/**
-	 * Configure the shell.
-	 * @param newShell
+	 * Open the window.
 	 */
-	@Override
-	protected void configureShell(Shell newShell) {
-		super.configureShell(newShell);
-		shell = newShell;
-		try{
-			InetAddress ip = InetAddress.getLocalHost();
-			newShell.setText("Remoteroid - "+ip.getHostAddress());
-		}catch(IOException e){
-			e.printStackTrace();
-			newShell.setText("Remoteroid - No connection");
+	public void open() {
+		Display display = Display.getDefault();
+		createContents();
+		shell.open();
+		shell.layout();
+		
+		clientManager.waitClientConnection();
+		
+		// Launch Welcome dialog
+		Object loginResult = new WelcomeDialog(shell, SWT.DEFAULT).open();
+		if(loginResult!=null){
+			currentAccount = (Account)loginResult;
+			setAccountSession(currentAccount);
+			Object deviceSelectionResult = new DeviceSelectionDialog(shell, SWT.DEFAULT).setUserAccount(currentAccount).open();
+			
+			if(deviceSelectionResult!=null){
+				currentDevice = (Device)deviceSelectionResult;
+				sendConnectionRequestToDevice();
+			}else{
+				// Client did not selected device.
+				setDeviceSession(null);
+				log.info("User did not selected device.");
+			}
+		}else{
+			// Client did not logged in
+			log.info("Not logged-in & Device not selected...");
+			setAccountSession(null);
+			setDeviceSession(null);
+		}
+		
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
+				display.sleep();
+			}
 		}
 		
 	}
+	
+	private void sendConnectionRequestToDevice(){
+		if(currentIpAddress==null){
+			MessageDialog.openError(shell, R.getString("error"), R.getString("invalid_ip_address"));
+			return;
+		}
+		if(currentDevice==null){
+			MessageDialog.openError(shell, R.getString("error"), R.getString("no_device_to_connect"));
+			return;
+		}
+		try {
+			new ProgressMonitorDialog(shell).run(true, true, new IRunnableWithProgress(){
+
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask(R.getString("fetching_device_list"), IProgressMonitor.UNKNOWN);
+					try {
+						WakeupMessage msg = new WakeupMessage();
+						msg.setDevice(currentDevice);
+						msg.setServerIpAddress(currentIpAddress);
+						
+						Request request = RequestFactory.getRequest(API.Wakeup.WAKE_UP).attachPayload(msg);
+						
+						final Response response = request.sendRequest();
+						
+						Display disp = Display.getCurrent();
+						disp.syncExec(new Runnable(){
+							public void run(){
+								
+								if(response.isSucceed()){
+									MessageDialog.openInformation(shell, R.getString("message_sent"),String.format(R.getString("connection_request_message_sent_to"), currentDevice.getNickname()));
+								}else{
+									switch(response.getErrorCode()){
+									case Codes.Error.Account.AUTH_FAILED:
+										MessageDialog.openError(shell, R.getString("error"), R.getString("failed_to_authenticate_user"));
+										break;
+									
+									case Codes.Error.GENERAL:
+										MessageDialog.openError(shell, R.getString("error"), R.getString("unexpected_error"));
+										break;
+									}
+									
+								}
+								
+							}
+						});
+						
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+				}
+				
+			});
+		} catch (InvocationTargetException ex) {
+			ex.printStackTrace();
+		} catch(InterruptedException ex){
+			ex.printStackTrace();
+		}
+		
+	}
+	
+	private void setAccountSession(Account account){
+		this.currentAccount = account;
+		if(currentAccount!=null){
+			accountMenuItem.setText(String.format(R.getString("logged_in_as"), currentAccount.getEmail()));
+			deviceMenuItem.setEnabled(true);
+		}else{
+			accountMenuItem.setText("Log-in...");
+		}
+	}
+	
+	private void setDeviceSession(Device device){
+		this.currentDevice = device;
+		if(currentDevice!=null){
+			deviceMenuItem.setText("Disconnect from device ("+currentDevice.getNickname()+")");
+		}else{
+			deviceMenuItem.setText("Connect to device...");
+		}
+	}
+	
+	private void resetSession(){
+		setAccountSession(null);
+		setDeviceSession(null);
+	}
 
 	/**
-	 * Return the initial size of the window.
+	 * Create contents of the window.
 	 */
-	@Override
-	protected Point getInitialSize() {
-		return new Point(355, 631);
+	protected void createContents() {
+		shell = new Shell();
+		shell.setSize(377, 666);
+		Rectangle parent = Display.getDefault().getBounds();
+		shell.setBounds((int)((double)(parent.width)/2+parent.x-130), 
+				(int)((double)(parent.height)/2+parent.y-333), 
+				377, 666);
+		try{
+			InetAddress ip = InetAddress.getLocalHost();
+			shell.setText("Remoteroid - "+ip.getHostAddress());
+			currentIpAddress = ip.getHostAddress();
+			
+			canvas = new DeviceScreenCanvas(shell, SWT.NONE);
+			canvas.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseUp(MouseEvent e) {
+					// TODO send mouse event to device
+				}
+			});
+			canvas.setBounds(24, 24, 326, 545);
+			
+			Button btnBack = new Button(shell, SWT.NONE);
+			btnBack.setBounds(24, 587, 94, 28);
+			btnBack.setText("Back");
+			
+			Button btnHome = new Button(shell, SWT.NONE);
+			btnHome.setBounds(143, 587, 94, 28);
+			btnHome.setText("Home");
+			
+			Button btnMenu = new Button(shell, SWT.NONE);
+			btnMenu.setBounds(256, 587, 94, 28);
+			btnMenu.setText("Menu");
+			
+			shell.setMenuBar(generateMenuBar());
+			
+			clientManager = new ClientManager(this);
+		}catch(IOException e){
+			e.printStackTrace();
+			shell.setText("Remoteroid - No connection");
+		}
+
+	}
+	
+
+	
+	private Menu generateMenuBar(){
+		Menu menu = new Menu(shell, SWT.BAR);
+		
+		MenuItem session = new MenuItem(menu, SWT.CASCADE);
+		session.setText("Session");
+		
+		Menu sessionMenu = new Menu(shell, SWT.DROP_DOWN);
+		session.setMenu(sessionMenu);
+		
+		accountMenuItem = new MenuItem(sessionMenu, SWT.PUSH);
+		accountMenuItem.setText("Log-in...");
+		accountMenuItem.addListener(SWT.Selection, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				new WelcomeDialog(shell, SWT.DEFAULT).setLooggedinAccount(currentAccount).open();
+			}
+			
+		});
+		
+		deviceMenuItem = new MenuItem(sessionMenu, SWT.PUSH);
+		deviceMenuItem.setText("Connect to device...");
+		deviceMenuItem.setEnabled(false);
+		deviceMenuItem.addListener(SWT.Selection, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				new DeviceSelectionDialog(shell, SWT.DEFAULT).open();
+			}
+			
+		});
+		
+		return menu;
 	}
 
 	@Override
@@ -261,17 +290,16 @@ public class Main extends ApplicationWindow implements ClientManager.ClientState
 
 	@Override
 	public void onReceiveScreen(final byte[] image) {
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
+		Display.getCurrent().syncExec(new Runnable(){
 			public void run(){
-				deviceScreenCanvas.setImage(image);
+				canvas.setImage(image);
 			}
 		});
-		
 	}
 
 	@Override
 	public void onDisconnected() {
+		// TODO Auto-generated method stub
 		
 	}
 }

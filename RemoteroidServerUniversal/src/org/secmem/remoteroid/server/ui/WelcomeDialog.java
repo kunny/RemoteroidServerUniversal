@@ -30,6 +30,8 @@ import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
 import org.secmem.remoteroid.lib.request.Request.RequestFactory;
 import org.secmem.remoteroid.lib.request.Response;
+import org.secmem.remoteroid.server.R;
+import org.eclipse.swt.widgets.Label;
 
 public class WelcomeDialog extends Dialog {
 
@@ -38,7 +40,12 @@ public class WelcomeDialog extends Dialog {
 	private Text txtEmail;
 	private Text txtPassword;
 	private Canvas canvas;
+	private Button btnRegisterNewAccount;
 	private Button btnSkipLogin;
+	private Button btnLogin;
+	private Label lblLoggedInAs;
+	
+	private Account currentAccount;
 
 	/**
 	 * Create the dialog.
@@ -47,7 +54,6 @@ public class WelcomeDialog extends Dialog {
 	 */
 	public WelcomeDialog(Shell parent, int style) {
 		super(parent, style);
-		setText("SWT Dialog");
 	}
 
 	/**
@@ -72,18 +78,18 @@ public class WelcomeDialog extends Dialog {
 	 */
 	private void createContents() {
 		shlWelcome = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-		shlWelcome.setSize(369, 390);
-		shlWelcome.setText("Welcome");
+		shlWelcome.setSize(369, 387);
+		shlWelcome.setText(R.getString("welcome"));
 		result = null; // Assume not logged in at first
 		
 		Rectangle parent = getParent().getBounds();
 		shlWelcome.setBounds((int)((double)(parent.width)/2+parent.x-184), 
-				(int)((double)(parent.height)/2+parent.y-182), 
-				369, 364);
+				(int)((double)(parent.height)/2+parent.y-163), 
+				369, 387);
 		
 		txtEmail = new Text(shlWelcome, SWT.BORDER);
-		txtEmail.setMessage("E-mail address");
-		txtEmail.setBounds(96, 195, 177, 22);
+		txtEmail.setMessage(R.getString("email"));
+		txtEmail.setBounds(98, 195, 177, 22);
 		txtEmail.addKeyListener(new KeyAdapter(){
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -104,24 +110,29 @@ public class WelcomeDialog extends Dialog {
 				}
 			}
 		});
-		txtPassword.setMessage("Password");
-		txtPassword.setBounds(96, 223, 177, 22);
+		txtPassword.setMessage(R.getString("password"));
+		txtPassword.setBounds(98, 223, 177, 22);
 		
-		final Image img = new Image(Display.getDefault(), "remoteroid.png");	
+		final Image img = new Image(Display.getDefault(), "res/remoteroid.png");	
 		
 		canvas = new Canvas(shlWelcome, SWT.NO_BACKGROUND);
 		canvas.setBounds(111, 39, 150, 150);
 		
-		Button btnRegisterNewAccount = new Button(shlWelcome, SWT.NONE);
+		btnRegisterNewAccount = new Button(shlWelcome, SWT.NONE);
 		btnRegisterNewAccount.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				RegisterDialog dlg = new RegisterDialog(shlWelcome, SWT.DEFAULT);
-				dlg.open();
+				if(currentAccount==null){
+					RegisterDialog dlg = new RegisterDialog(shlWelcome, SWT.DEFAULT);
+					dlg.open();
+				}else{
+					// If user have logged-in, Just close dialog
+					shlWelcome.close();
+				}
 			}
 		});
-		btnRegisterNewAccount.setBounds(77, 266, 219, 28);
-		btnRegisterNewAccount.setText("Register new account...");
+		btnRegisterNewAccount.setBounds(77, 290, 219, 28);
+		btnRegisterNewAccount.setText(R.getString("register_new_account"));
 		
 		btnSkipLogin = new Button(shlWelcome, SWT.NONE);
 		btnSkipLogin.addMouseListener(new MouseAdapter() {
@@ -130,8 +141,25 @@ public class WelcomeDialog extends Dialog {
 				shlWelcome.close();
 			}
 		});
-		btnSkipLogin.setBounds(77, 292, 219, 28);
-		btnSkipLogin.setText("Skip login");
+		btnSkipLogin.setBounds(77, 316, 219, 28);
+		btnSkipLogin.setText(R.getString("skip_login"));
+		
+		btnLogin = new Button(shlWelcome, SWT.NONE);
+		btnLogin.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				processLogin();
+			}
+		});
+		btnLogin.setBounds(77, 256, 219, 28);
+		btnLogin.setText(R.getString("login"));
+		
+		lblLoggedInAs = new Label(shlWelcome, SWT.NONE);
+		lblLoggedInAs.setAlignment(SWT.CENTER);
+		lblLoggedInAs.setBounds(25, 214, 317, 22);
+		lblLoggedInAs.setText("Logged in as : test@test.com");
+		lblLoggedInAs.setVisible(false);
+		
 		canvas.addPaintListener(new PaintListener(){
 
 			@Override
@@ -141,6 +169,22 @@ public class WelcomeDialog extends Dialog {
 			
 		});
 		
+		// Represent current login information if logged-in
+		if(currentAccount!=null){
+			lblLoggedInAs.setText(String.format(R.getString("logged_in_as"), currentAccount.getEmail()));
+			lblLoggedInAs.setVisible(true);
+			txtEmail.setVisible(false);
+			txtPassword.setVisible(false);
+			btnSkipLogin.setVisible(false);
+			btnLogin.setVisible(false);
+			btnRegisterNewAccount.setText(R.getString("close"));
+		}
+		
+	}
+	
+	public WelcomeDialog setLooggedinAccount(Account account){
+		this.currentAccount = account;
+		return this;
 	}
 	
 	private void processLogin(){
@@ -152,17 +196,17 @@ public class WelcomeDialog extends Dialog {
 			final String password = txtPassword.getText();
 			
 			if(email.length()==0){
-				MessageDialog.openError(shlWelcome, "Error", "Enter your E-mail address.");
+				MessageDialog.openError(shlWelcome, R.getString("error"), R.getString("enter_email_address"));
 				return;
 			}
 			
 			if(!Pattern.matches("[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})", email)){
-				MessageDialog.openError(shlWelcome, "Error", "Please enter a valid E-mail address.");
+				MessageDialog.openError(shlWelcome, R.getString("error"), R.getString("enter_valid_email_address"));
 				return;
 			}
 			
 			if(password.length()==0){
-				MessageDialog.openError(shlWelcome, "Error", "Please enter password.");
+				MessageDialog.openError(shlWelcome, R.getString("error"), R.getString("enter_password"));
 				return;
 			}
 			
@@ -173,7 +217,7 @@ public class WelcomeDialog extends Dialog {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Login in progres..", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(R.getString("login_in_progress"), IProgressMonitor.UNKNOWN);
 					try {
 						Account account = new Account();
 						account.setEmail(email);
@@ -189,16 +233,16 @@ public class WelcomeDialog extends Dialog {
 								
 								if(response.isSucceed()){
 									// Set result to Account : User has logged-in.
-									result = response.getPayloadAsAccount();
+									result = (Account)response.getPayloadAsAccount();
 									shlWelcome.close();
 								}else{
 									switch(response.getErrorCode()){
 									case Codes.Error.Account.AUTH_FAILED:
-										MessageDialog.openError(shlWelcome, "Login failed", "Failed to authenticate user.");
+										MessageDialog.openError(shlWelcome, R.getString("login_failed"), R.getString("failed_to_authenticate_user"));
 										break;
 										
 									case Codes.Error.GENERAL:
-										MessageDialog.openError(shlWelcome, "Login failed", "Unexpected error has occoured.");
+										MessageDialog.openError(shlWelcome, R.getString("login_failed"), R.getString("unexpected_error"));
 										break;
 									}
 									
@@ -221,8 +265,9 @@ public class WelcomeDialog extends Dialog {
 		} catch(InterruptedException ex){
 			ex.printStackTrace();
 		}
-		
-		txtPassword.setSelection(0, txtPassword.getText().length());
-		txtPassword.setFocus();
+		if(shlWelcome!=null && !shlWelcome.isDisposed()){
+			txtPassword.setSelection(0, txtPassword.getText().length());
+			txtPassword.setFocus();
+		}
 	}
 }

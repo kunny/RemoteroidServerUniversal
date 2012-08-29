@@ -39,7 +39,6 @@ public class ClientManager implements CommandStateListener, ScreenStateListener{
 			throw new IllegalStateException("Client state listener cannot be null!");
 		}
 		
-		
 		new Thread(new Runnable(){
 			@Override
 			public void run(){
