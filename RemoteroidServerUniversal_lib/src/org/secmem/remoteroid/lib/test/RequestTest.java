@@ -14,7 +14,7 @@ import org.secmem.remoteroid.lib.request.Response;
 
 public class RequestTest {
 
-	//@Test
+	@Test
 	public void testRegister(){
 		Request request = RequestFactory.getRequest(API.Account.ADD_ACCOUNT);
 		Account account = new Account();

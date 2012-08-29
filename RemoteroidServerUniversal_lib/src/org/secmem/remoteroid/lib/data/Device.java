@@ -103,7 +103,11 @@ public class Device{
 	
 	public static Device fromJson(String jsonString) throws JSONException{
 		JSONObject json = new JSONObject(jsonString);
-		Account ownerAccount = Account.fromJson(json.getJSONObject("ownerAccount"));
+		Account ownerAccount = null;
+		try{
+			ownerAccount = Account.fromJson(json.getJSONObject("ownerAccount"));
+		}catch(JSONException e){
+		}
 		Device device = new Device();
 		device.setOwnerAccount(ownerAccount);
 		device.setNickname(json.getString("nickname"));
@@ -113,7 +117,11 @@ public class Device{
 	}
 	
 	public static Device fromJson(JSONObject json) throws JSONException{
-		Account ownerAccount = Account.fromJson(json.getJSONObject("ownerAccount"));
+		Account ownerAccount = null;
+		try{
+			ownerAccount = Account.fromJson(json.getJSONObject("ownerAccount"));
+		}catch(JSONException e){
+		}
 		Device device = new Device();
 		device.setOwnerAccount(ownerAccount);
 		device.setNickname(json.getString("nickname"));

@@ -124,18 +124,25 @@ public class Response {
 	}
 	
 	/**
-	 * Parse payload as a List of {@link Device}s type.
+	 * Parse payload as a List of {@link Device} type.
 	 * @return the payload in {@link Device} type if possible, null if the payload is not a Device type.
 	 */
 	public ArrayList<Device> getPayloadAsDeviceList(){
 		String payload = getPayload();
 		try{
-			JSONArray arr = new JSONArray(payload);
-			int arrSize = arr.length();
-			
 			ArrayList<Device> list = new ArrayList<Device>();
-			for(int i=0; i<arrSize; ++i){
-				Device device = Device.fromJson(arr.getJSONObject(i));
+			
+			try{
+				JSONArray arr = new JSONArray(payload);
+				int arrSize = arr.length();
+				
+				for(int i=0; i<arrSize; ++i){
+					Device device = Device.fromJson(arr.getJSONObject(i));
+					list.add(device);
+				}
+			}catch(JSONException e){
+				// result has only one device
+				Device device = Device.fromJson(new JSONObject(payload));
 				list.add(device);
 			}
 			return list;
