@@ -9,6 +9,11 @@ import org.json.JSONObject;
  *
  */
 public class WakeupMessage {
+	
+	/**
+	 * An extra key for extracting server's IP address included in Push message
+	 */
+	public static final String IP_ADDRESS = "ip_address";
 
 	/**
 	 * A device will be waked up for
