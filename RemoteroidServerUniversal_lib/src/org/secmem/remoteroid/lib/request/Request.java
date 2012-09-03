@@ -58,7 +58,7 @@ public class Request {
 	 * @param account an Account object
 	 * @return this request
 	 */
-	public Request attachPayload(Account account){
+	private Request setPayload(Account account){
 		this.payload = new Gson().toJson(account);
 		return this;
 	}
@@ -68,7 +68,7 @@ public class Request {
 	 * @param device a Device object
 	 * @return this request
 	 */
-	public Request attachPayload(Device device){
+	private Request setPayload(Device device){
 		this.payload = new Gson().toJson(device);
 		return this;
 	}
@@ -78,7 +78,7 @@ public class Request {
 	 * @param msg a WakeupMessage object
 	 * @return this request
 	 */
-	public Request attachPayload(WakeupMessage msg){
+	private Request setPayload(WakeupMessage msg){
 		this.payload = new Gson().toJson(msg);
 		return this;
 	}
@@ -159,9 +159,15 @@ public class Request {
 	 * @author Taeho Kim
 	 *
 	 */
-	public static class RequestFactory {
-		private RequestFactory(){
-			
+	public static class RequestBuilder {
+		private Request req;
+		
+		private RequestBuilder(){
+			req = new Request();
+		}
+		
+		private void setRequest(String path, RequestType type){
+			req.setRequest(path, type);
 		}
 		
 		/**
@@ -171,29 +177,65 @@ public class Request {
 		 * @see org.secmem.remoteroid.lib.api.API.Account Client APIs for Account
 		 * @see org.secmem.remoteroid.lib.api.API.Device Client APIs for Device
 		 */
-		public static Request getRequest(int request){
+		public static RequestBuilder getRequest(int request){
+			RequestBuilder builder = new RequestBuilder();
 			switch(request){
 			case API.Account.ADD_ACCOUNT:
-				return new Request().setRequest("/account/register", RequestType.POST);
+				builder.setRequest("/account/register", RequestType.POST);
+				break;
 			case API.Account.LOGIN:
-				return new Request().setRequest("/account/login", RequestType.POST);
+				builder.setRequest("/account/login", RequestType.POST);
+				break;
 			case API.Account.DELETE_ACCOUNT:
-				return new Request().setRequest("/account/unregister", RequestType.POST);
+				builder.setRequest("/account/unregister", RequestType.POST);
+				break;
 			case API.Device.ADD_DEVICE:
-				return new Request().setRequest("/device/register", RequestType.POST);
+				builder.setRequest("/device/register", RequestType.POST);
+				break;
 			case API.Device.LIST_DEVICE:
-				return new Request().setRequest("/device/list", RequestType.POST);
+				builder.setRequest("/device/list", RequestType.POST);
+				break;
 			case API.Device.UPDATE_DEVICE_INFO:
-				return new Request().setRequest("/device/update", RequestType.POST);
+				builder.setRequest("/device/update", RequestType.POST);
+				break;
 			case API.Device.DELETE_DEVICE:
-				return new Request().setRequest("/device/delete", RequestType.POST);
+				builder.setRequest("/device/delete", RequestType.POST);
+				break;
 			case API.Device.DELETE_ALL_USER_DEVICE:
-				return new Request().setRequest("/device/deleteAll", RequestType.POST);
+				builder.setRequest("/device/deleteAll", RequestType.POST);
+				break;
 			case API.Wakeup.WAKE_UP:
-				return new Request().setRequest("/wakeup", RequestType.POST);
+				builder.setRequest("/wakeup", RequestType.POST);
+				break;
 			default:
 				throw new IllegalArgumentException();
 			}
+			return builder;
+		}
+		
+		public RequestBuilder setPayload(Account account){
+			if(req!=null){
+				req.setPayload(account);
+			}
+			return this;
+		}
+		
+		public RequestBuilder setPayload(Device device){
+			if(req!=null){
+				req.setPayload(device);
+			}
+			return this;
+		}
+		
+		public RequestBuilder setPayload(WakeupMessage msg){
+			if(req!=null){
+				req.setPayload(msg);
+			}
+			return this;
+		}
+		
+		public Request build(){
+			return req;
 		}
 	}
 	

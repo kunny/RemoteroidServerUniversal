@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import org.secmem.remoteroid.lib.net.CommandPacket;
 
 import com.google.gson.Gson;
 
 public class CommandReceiverThread extends Thread {
+	private static final Logger log = Logger.getLogger("CommandReceiverThread");
 	private CommandStateListener listener;
 	private Socket socket;
 	
@@ -27,12 +29,12 @@ public class CommandReceiverThread extends Thread {
 	public void run(){
 		try{
 			// Start listening client connection
-			System.out.println("Waiting for connection..");
+			log.info("Waiting for connection..");
 			
-			Socket clientSocket = new ServerSocket(CommandPacket.SOCKET_PORT).accept();
+			socket = new ServerSocket(CommandPacket.SOCKET_PORT).accept();
 			
 			// Get inputstream of connected socket
-			ObjectInputStream inStream = new ObjectInputStream(clientSocket.getInputStream());
+			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 			
 			// Start listening data from client
 			while(true){

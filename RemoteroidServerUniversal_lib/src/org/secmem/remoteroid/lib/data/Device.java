@@ -129,6 +129,5 @@ public class Device{
 		device.setDeviceUUID(json.getString("deviceUUID"));
 		return device;
 	}
-	
-	
+
 }

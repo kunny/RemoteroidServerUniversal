@@ -28,7 +28,7 @@ import org.secmem.remoteroid.lib.data.Device;
 import org.secmem.remoteroid.lib.data.WakeupMessage;
 import org.secmem.remoteroid.lib.net.CommandPacket;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestFactory;
+import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
 import org.secmem.remoteroid.server.net.ClientManager;
@@ -126,7 +126,7 @@ public class Main implements ClientManager.ClientStateListener{
 						msg.setDevice(currentDevice);
 						msg.setServerIpAddress(currentIpAddress);
 						
-						Request request = RequestFactory.getRequest(API.Wakeup.WAKE_UP).attachPayload(msg);
+						Request request = RequestBuilder.getRequest(API.Wakeup.WAKE_UP).setPayload(msg).build();
 						
 						final Response response = request.sendRequest();
 						

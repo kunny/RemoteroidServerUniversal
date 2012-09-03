@@ -9,18 +9,18 @@ import org.junit.Test;
 import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestFactory;
+import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 
 public class RequestTest {
 
 	@Test
 	public void testRegister(){
-		Request request = RequestFactory.getRequest(API.Account.ADD_ACCOUNT);
+		
 		Account account = new Account();
 		account.setEmail("test@test.com");
 		account.setPassword("pass");
-		request.attachPayload(account);
+		Request request = RequestBuilder.getRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
 		try {
 			Response resp = request.sendRequest();
 			if(resp.isSucceed()){
@@ -41,11 +41,12 @@ public class RequestTest {
 	
 	@Test
 	public void testLogin(){
-		Request request = RequestFactory.getRequest(API.Account.LOGIN);
+		
 		Account account = new Account();
 		account.setEmail("test@test.com");
 		account.setPassword("pass");
-		request.attachPayload(account);
+		
+		Request request = RequestBuilder.getRequest(API.Account.LOGIN).setPayload(account).build();
 		try{
 			Response resp = request.sendRequest();
 			if(!resp.isSucceed()){

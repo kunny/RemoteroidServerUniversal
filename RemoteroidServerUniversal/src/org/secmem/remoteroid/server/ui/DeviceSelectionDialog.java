@@ -25,7 +25,7 @@ import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.data.Device;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestFactory;
+import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
 
@@ -170,7 +170,7 @@ public class DeviceSelectionDialog extends Dialog {
 						InterruptedException {
 					monitor.beginTask(R.getString("fetching_device_list"), IProgressMonitor.UNKNOWN);
 					try {
-						Request request = RequestFactory.getRequest(API.Device.LIST_DEVICE).attachPayload(account);
+						Request request = RequestBuilder.getRequest(API.Device.LIST_DEVICE).setPayload(account).build();
 						
 						final Response response = request.sendRequest();
 						

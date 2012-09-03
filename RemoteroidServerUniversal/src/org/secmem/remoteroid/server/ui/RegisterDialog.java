@@ -25,7 +25,7 @@ import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestFactory;
+import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
 
@@ -164,8 +164,7 @@ public class RegisterDialog extends Dialog {
 								account.setEmail(email);
 								account.setPassword(pass);
 								
-								Request request = RequestFactory.getRequest(API.Account.ADD_ACCOUNT).attachPayload(account);
-								request.attachPayload(account);
+								Request request = RequestBuilder.getRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
 								
 								final Response response = request.sendRequest();
 								

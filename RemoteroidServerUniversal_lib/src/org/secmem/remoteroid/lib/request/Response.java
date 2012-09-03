@@ -132,19 +132,14 @@ public class Response {
 		try{
 			ArrayList<Device> list = new ArrayList<Device>();
 			
-			try{
-				JSONArray arr = new JSONArray(payload);
-				int arrSize = arr.length();
-				
-				for(int i=0; i<arrSize; ++i){
-					Device device = Device.fromJson(arr.getJSONObject(i));
-					list.add(device);
-				}
-			}catch(JSONException e){
-				// result has only one device
-				Device device = Device.fromJson(new JSONObject(payload));
+			JSONArray arr = new JSONArray(payload);
+			int arrSize = arr.length();
+			
+			for(int i=0; i<arrSize; ++i){
+				Device device = Device.fromJson(arr.getJSONObject(i));
 				list.add(device);
 			}
+			
 			return list;
 		}catch(JSONException e){
 			e.printStackTrace();

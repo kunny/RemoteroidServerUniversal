@@ -22,16 +22,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestFactory;
+import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
-import org.eclipse.swt.widgets.Label;
 
 public class WelcomeDialog extends Dialog {
 
@@ -223,7 +223,7 @@ public class WelcomeDialog extends Dialog {
 						account.setEmail(email);
 						account.setPassword(password);
 						
-						Request request = RequestFactory.getRequest(API.Account.LOGIN).attachPayload(account);
+						Request request = RequestBuilder.getRequest(API.Account.LOGIN).setPayload(account).build();
 						
 						final Response response = request.sendRequest();
 						
