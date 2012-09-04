@@ -2,6 +2,8 @@ package org.secmem.remoteroid.lib.data;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.secmem.remoteroid.lib.util.Obfuscator;
+import org.secmem.remoteroid.lib.util.SHAObfuscator;
 
 /**
  * Contains data regarding each device.
@@ -86,7 +88,7 @@ public class Device{
 	}
 
 	/**
-	 * Get device's UUID in owner's account
+	 * Get device's Obfuscated UUID
 	 * @return an UUID
 	 */
 	public String getUUID() {
@@ -94,11 +96,12 @@ public class Device{
 	}
 
 	/**
-	 * Set device's UUID
-	 * @param deviceUUID an UUID
+	 * Set device's UUID. Given raw UUID will be obfuscated.
+	 * @param deviceUUID an UUID (device's Wi-Fi mac address by typical)
 	 */
 	public void setDeviceUUID(String deviceUUID) {
-		this.deviceUUID = deviceUUID;
+		Obfuscator obfuscator = new SHAObfuscator();
+		this.deviceUUID = obfuscator.generate(deviceUUID);
 	}
 	
 	public static Device fromJson(String jsonString) throws JSONException{

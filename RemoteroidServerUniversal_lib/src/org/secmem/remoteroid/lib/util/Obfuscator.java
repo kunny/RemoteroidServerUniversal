@@ -18,30 +18,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.secmem.remoteroid.lib.api;
+package org.secmem.remoteroid.lib.util;
 
-public class Codes {
-	
-	public static final int NONE = -100;
-	
-	public static class Result{
-		public static final int OK = 0;
-		public static final int FAILED = -1;
-	}
-	
-	public static class Error{
-		public static final int GENERAL = 0x000;
-		
-		public static class Account{
-			public static final int DUPLICATE_EMAIL = 0x100;
-			public static final int AUTH_FAILED = 0x101;
-			public static final int NOT_VALID_EMAIL = 0x102;
-		}
-		
-		public static class Device{
-			public static final int DUPLICATE_NAME = 0x200;
-			public static final int DEVICE_NOT_FOUND = 0x201;
-			public static final int NO_DEVICE_UUID = 0x202;
-		}
-	}
+public interface Obfuscator {
+	public String generate(String password);
+	public boolean matches(String obfuscatedPassword, String rawPassword);
 }
