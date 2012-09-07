@@ -171,13 +171,14 @@ public class Request {
 		}
 		
 		/**
-		 * Generate a new request.
-		 * @param request API code for request
+		 * Sets a request.
+		 * @param request API code for request which can be found in org.secmem.remoteroid.lib.api.API package
 		 * @return a Request object
-		 * @see org.secmem.remoteroid.lib.api.API.Account Client APIs for Account
-		 * @see org.secmem.remoteroid.lib.api.API.Device Client APIs for Device
+		 * @see org.secmem.remoteroid.lib.api.API.Account
+		 * @see org.secmem.remoteroid.lib.api.API.Device
+		 * @see org.secmem.remoteroid.lib.api.API.Wakeup
 		 */
-		public static RequestBuilder getRequest(int request){
+		public static RequestBuilder setRequest(int request){
 			RequestBuilder builder = new RequestBuilder();
 			switch(request){
 			case API.Account.ADD_ACCOUNT:

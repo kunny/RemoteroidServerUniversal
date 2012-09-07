@@ -20,7 +20,7 @@ public class RequestTest {
 		Account account = new Account();
 		account.setEmail("test@test.com");
 		account.setPassword("pass");
-		Request request = RequestBuilder.getRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
+		Request request = RequestBuilder.setRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
 		try {
 			Response resp = request.sendRequest();
 			if(resp.isSucceed()){
@@ -46,7 +46,7 @@ public class RequestTest {
 		account.setEmail("test@test.com");
 		account.setPassword("pass");
 		
-		Request request = RequestBuilder.getRequest(API.Account.LOGIN).setPayload(account).build();
+		Request request = RequestBuilder.setRequest(API.Account.LOGIN).setPayload(account).build();
 		try{
 			Response resp = request.sendRequest();
 			if(!resp.isSucceed()){
