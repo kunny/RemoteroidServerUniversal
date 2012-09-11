@@ -2,7 +2,7 @@ package org.secmem.remoteroid.lib.net;
 
 import java.io.Serializable;
 
-public class ImagePacket implements Serializable{
+public class ScreenPacket implements Serializable{
 	
 	private static final long serialVersionUID = 8768936635689630777L;
 
@@ -10,7 +10,7 @@ public class ImagePacket implements Serializable{
 	
 	private byte[] image;
 	
-	public ImagePacket(){
+	public ScreenPacket(){
 		
 	}
 	

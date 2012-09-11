@@ -86,10 +86,8 @@ public class Request {
 	/**
 	 * Send a request to server
 	 * @return a Response
-	 * @throws MalformedURLException
-	 * @throws IOException
 	 */
-	public Response sendRequest() throws MalformedURLException, IOException{
+	public Response sendRequest(){
 		Response response = new Response();
 		try{
 			String respInString;
@@ -100,6 +98,10 @@ public class Request {
 			}
 			response.parse(respInString);
 		}catch(ParseException e){
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		// If cannot parse the response, just return default Response.
@@ -159,10 +161,10 @@ public class Request {
 	 * @author Taeho Kim
 	 *
 	 */
-	public static class RequestBuilder {
+	public static class Builder {
 		private Request req;
 		
-		private RequestBuilder(){
+		private Builder(){
 			req = new Request();
 		}
 		
@@ -178,8 +180,8 @@ public class Request {
 		 * @see org.secmem.remoteroid.lib.api.API.Device
 		 * @see org.secmem.remoteroid.lib.api.API.Wakeup
 		 */
-		public static RequestBuilder setRequest(int request){
-			RequestBuilder builder = new RequestBuilder();
+		public static Builder setRequest(int request){
+			Builder builder = new Builder();
 			switch(request){
 			case API.Account.ADD_ACCOUNT:
 				builder.setRequest("/account/register", RequestType.POST);
@@ -192,6 +194,9 @@ public class Request {
 				break;
 			case API.Device.ADD_DEVICE:
 				builder.setRequest("/device/register", RequestType.POST);
+				break;
+			case API.Device.RETRIEVE_DEVICE_INFO:
+				builder.setRequest("/device/retrieve_info", RequestType.POST);
 				break;
 			case API.Device.LIST_DEVICE:
 				builder.setRequest("/device/list", RequestType.POST);
@@ -214,21 +219,21 @@ public class Request {
 			return builder;
 		}
 		
-		public RequestBuilder setPayload(Account account){
+		public Builder setPayload(Account account){
 			if(req!=null){
 				req.setPayload(account);
 			}
 			return this;
 		}
 		
-		public RequestBuilder setPayload(Device device){
+		public Builder setPayload(Device device){
 			if(req!=null){
 				req.setPayload(device);
 			}
 			return this;
 		}
 		
-		public RequestBuilder setPayload(WakeupMessage msg){
+		public Builder setPayload(WakeupMessage msg){
 			if(req!=null){
 				req.setPayload(msg);
 			}

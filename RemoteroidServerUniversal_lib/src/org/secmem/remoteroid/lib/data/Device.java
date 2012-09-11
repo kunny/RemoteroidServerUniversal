@@ -2,6 +2,7 @@ package org.secmem.remoteroid.lib.data;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.secmem.remoteroid.lib.util.DeviceUUIDGenerator;
 import org.secmem.remoteroid.lib.util.Obfuscator;
 import org.secmem.remoteroid.lib.util.SHAObfuscator;
 
@@ -94,14 +95,18 @@ public class Device{
 	public String getUUID() {
 		return deviceUUID;
 	}
+	
+	private void setDeviceUUID(String uuid){
+		this.deviceUUID = uuid;
+	}
 
 	/**
 	 * Set device's UUID. Given raw UUID will be obfuscated.
 	 * @param deviceUUID an UUID (device's Wi-Fi mac address by typical)
 	 */
-	public void setDeviceUUID(String deviceUUID) {
+	public void setDeviceUUID(DeviceUUIDGenerator generator) {
 		Obfuscator obfuscator = new SHAObfuscator();
-		this.deviceUUID = obfuscator.generate(deviceUUID);
+		this.deviceUUID = obfuscator.generate(generator.generate());
 	}
 	
 	public static Device fromJson(String jsonString) throws JSONException{

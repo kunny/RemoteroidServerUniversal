@@ -2,14 +2,11 @@ package org.secmem.remoteroid.lib.test;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 import org.junit.Test;
 import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
+import org.secmem.remoteroid.lib.request.Request.Builder;
 import org.secmem.remoteroid.lib.request.Response;
 
 public class RequestTest {
@@ -20,22 +17,16 @@ public class RequestTest {
 		Account account = new Account();
 		account.setEmail("test@test.com");
 		account.setPassword("pass");
-		Request request = RequestBuilder.setRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
-		try {
-			Response resp = request.sendRequest();
-			if(resp.isSucceed()){
-				Account acc = resp.getPayloadAsAccount();
-				assertEquals("test@test.com", acc.getEmail());
-			}else{
-				fail();
-			}
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		Request request = Builder.setRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
+		
+		Response resp = request.sendRequest();
+		if(resp.isSucceed()){
+			Account acc = resp.getPayloadAsAccount();
+			assertEquals("test@test.com", acc.getEmail());
+		}else{
+			fail();
 		}
+		
 		
 	}
 	
@@ -46,17 +37,13 @@ public class RequestTest {
 		account.setEmail("test@test.com");
 		account.setPassword("pass");
 		
-		Request request = RequestBuilder.setRequest(API.Account.LOGIN).setPayload(account).build();
-		try{
-			Response resp = request.sendRequest();
-			if(!resp.isSucceed()){
-				fail();
-			}
-		}catch(MalformedURLException e){
-			e.printStackTrace();
-		}catch(IOException e){
-			e.printStackTrace();
+		Request request = Builder.setRequest(API.Account.LOGIN).setPayload(account).build();
+		
+		Response resp = request.sendRequest();
+		if(!resp.isSucceed()){
+			fail();
 		}
+
 	}
 
 }

@@ -17,6 +17,7 @@ public class API {
 	public static class Device{
 		public static final int ADD_DEVICE = 0x101;
 		public static final int UPDATE_DEVICE_INFO = 0x102;
+		public static final int RETRIEVE_DEVICE_INFO = 0x106;
 		public static final int LIST_DEVICE = 0x103;
 		public static final int DELETE_DEVICE = 0x104;
 		public static final int DELETE_ALL_USER_DEVICE = 0x105;

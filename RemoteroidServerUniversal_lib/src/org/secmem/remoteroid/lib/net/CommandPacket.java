@@ -249,5 +249,9 @@ public class CommandPacket {
 	public String toString(){
 		return new Gson().toJson(this);
 	}
+	
+	public static CommandPacket fromString(String jsonString){
+		return new Gson().fromJson(jsonString, CommandPacket.class);
+	}
 
 }
