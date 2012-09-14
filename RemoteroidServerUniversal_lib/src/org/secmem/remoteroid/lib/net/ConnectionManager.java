@@ -26,10 +26,6 @@ public class ConnectionManager {
 		
 	}
 	
-	public void setTargetIpAddress(String address){
-		this.targetIpAddress = address;
-	}
-	
 	public void setServerConnectionListener(ServerConnectionListener listener){
 		this.connListener = listener;
 	}
@@ -38,18 +34,40 @@ public class ConnectionManager {
 		this.commListener = listener;
 	}
 	
-	public synchronized void connect(String ipAddress){
+	public synchronized void connectCommand(String ipAddress){
 		this.targetIpAddress = ipAddress;
-		new ServerConnectionThread(connListener).setTargetAddress(targetIpAddress).start();
+		new CommandConnectionThread(connListener).setTargetAddress(targetIpAddress).start();
 	}
 	
-	public synchronized void teardown(){
+	public synchronized void connectScreen(String ipAddress){
+		new ScreenConnectionThread(connListener).setTargetAddress(ipAddress).start();
+	}
+	
+	public void disconnectScreen(){
+		try{
+			if(screenSocket!=null){
+				screenSocket.close();
+			}
+		}catch(IOException e){
+			
+		}
+	}
+	
+	public synchronized void disconnect(){
 		try{
 			commandSocket.close();
 			screenSocket.close();
 		}catch(IOException e){
-			
+			e.printStackTrace();
 		}
+	}
+	
+	public boolean isCommandConnected(){
+		return (commandSocket!=null && commandSocket.isConnected());
+	}
+	
+	public boolean isScreenConnected(){
+		return (screenSocket!=null && screenSocket.isConnected());
 	}
 	
 	public void listenCommandFromServer(){
@@ -64,16 +82,12 @@ public class ConnectionManager {
 			throw new IllegalStateException("Connection listener cannot be null.");
 		}
 		
-		new Thread(new Runnable(){
-			public void run(){
-				try{
-					screenOutStream.write(image);
-				}catch(IOException e){
-					e.printStackTrace();
-					connListener.onScreenDisconnected();
-				}
-			}
-		}).start();
+		try{
+			screenOutStream.write(image);
+		}catch(IOException e){
+			e.printStackTrace();
+			disconnect();
+		}
 	}
 	
 	public void sendCommand(CommandPacket command){
@@ -89,19 +103,19 @@ public class ConnectionManager {
 		}
 	}
 	
-	class ServerConnectionThread extends Thread{
+	class CommandConnectionThread extends Thread{
 		
 		private ServerConnectionListener listener;
 		private String targetIpAddress;
 		
-		public ServerConnectionThread(ServerConnectionListener listener){
+		public CommandConnectionThread(ServerConnectionListener listener){
 			if(listener==null){
 				throw new IllegalStateException("Listener cannot be null");
 			}
 			this.listener = listener;
 		}
 		
-		public ServerConnectionThread setTargetAddress(String ipAddress){
+		public CommandConnectionThread setTargetAddress(String ipAddress){
 			this.targetIpAddress = ipAddress;
 			return this;
 		}
@@ -118,27 +132,61 @@ public class ConnectionManager {
 				} catch (IOException e) {}
 			}
 			
+			try{
+				commandSocket = new Socket();
+				commandSocket.connect(new InetSocketAddress(targetIpAddress, CommandPacket.SOCKET_PORT), DEFAULT_TIMEOUT);
+				
+				// Get input/outputstream from command socket
+				commandInStream = new ObjectInputStream(commandSocket.getInputStream());
+				commandOutStream = new ObjectOutputStream(commandSocket.getOutputStream());
+				
+				listener.onCommandConnected(targetIpAddress);
+			}catch(IOException e){
+				e.printStackTrace();
+				listener.onFailed();
+			}
+		}
+	}
+	
+	class ScreenConnectionThread extends Thread{
+		
+		private ServerConnectionListener listener;
+		private String targetIpAddress;
+		
+		public ScreenConnectionThread(ServerConnectionListener listener){
+			if(listener==null){
+				throw new IllegalStateException("Listener cannot be null");
+			}
+			this.listener = listener;
+		}
+		
+		public ScreenConnectionThread setTargetAddress(String ipAddress){
+			this.targetIpAddress = ipAddress;
+			return this;
+		}
+		
+		@Override
+		public void run(){
+			if(targetIpAddress==null){
+				throw new IllegalStateException("Target's IP address cannot be null");
+			}
+			
 			if(screenSocket!=null){
 				try{
 					screenSocket.close();
 				}catch(IOException e){}
 			}
 			try{
-				commandSocket = new Socket();
-				commandSocket.connect(new InetSocketAddress(targetIpAddress, CommandPacket.SOCKET_PORT), DEFAULT_TIMEOUT);
-				
 				screenSocket = new Socket();
 				screenSocket.connect(new InetSocketAddress(targetIpAddress, ScreenPacket.SOCKET_PORT), DEFAULT_TIMEOUT);
-				
-				// Get input/outputstream from command socket
-				commandInStream = new ObjectInputStream(commandSocket.getInputStream());
-				commandOutStream = new ObjectOutputStream(commandSocket.getOutputStream());
 				
 				// Get outputstream from screen socket
 				screenOutStream = screenSocket.getOutputStream();
 				
+				listener.onScreenConnected(targetIpAddress);
 			}catch(IOException e){
-				listener.onConnected();
+				e.printStackTrace();
+				listener.onFailed();
 			}
 		}
 	}
@@ -176,9 +224,9 @@ public class ConnectionManager {
 	}
 	
 	public interface ServerConnectionListener{
-		public void onConnected();
+		public void onCommandConnected(String ipAddress);
+		public void onScreenConnected(String ipAddress);
 		public void onFailed();
-		public void onScreenDisconnected();
 	}
 	
 	public interface ServerCommandListener{

@@ -180,37 +180,37 @@ public class CommandPacket {
 	
 	public static class CommandFactory{
 		
-		CommandPacket requestDeviceInfo(){
+		public static CommandPacket requestDeviceInfo(){
 			return new CommandPacket().setCommand(Command.REQUEST_DEVICE_INFO);
 		}
 		
-		CommandPacket sendDeviceInfo(int width, int height){
+		public static CommandPacket sendDeviceInfo(int width, int height){
 			return new CommandPacket().setCommand(Command.DEVICE_INFO)
 					.addExtra(Extra.KEY_SCREEN_WIDTH, width)
 					.addExtra(Extra.KEY_SCREEN_HEIGHT, height);
 		}
 		
-		CommandPacket keyDown(int keyCode){
+		public static CommandPacket keyDown(int keyCode){
 			return new CommandPacket().setCommand(Command.KEY_DOWN)
 					.addExtra(Extra.KEY_KEYCODE, keyCode);
 		}
 		
-		CommandPacket keyUp(int keyCode){
+		public static CommandPacket keyUp(int keyCode){
 			return new CommandPacket().setCommand(Command.KEY_UP)
 					.addExtra(Extra.KEY_KEYCODE, keyCode);
 		}
 		
-		CommandPacket touchDown(int x, int y){
+		public static CommandPacket touchDown(int x, int y){
 			return new CommandPacket().setCommand(Command.TOUCH_DOWN)
 					.addExtra(Extra.KEY_TOUCH_X, x).addExtra(Extra.KEY_TOUCH_Y, y);
 		}
 		
-		CommandPacket touchUp(int x, int y){
+		public static CommandPacket touchUp(int x, int y){
 			return new CommandPacket().setCommand(Command.TOUCH_UP)
 					.addExtra(Extra.KEY_TOUCH_X, x).addExtra(Extra.KEY_TOUCH_Y, y);
 		}
 		
-		CommandPacket notification(int notificationType, String... data){
+		public static CommandPacket notification(int notificationType, String... data){
 			CommandPacket packet = new CommandPacket();
 			packet.setCommand(Command.NOTIFICATION);
 			packet.addExtra(Extra.KEY_NOTIFICATION_TYPE, notificationType);
@@ -240,7 +240,7 @@ public class CommandPacket {
 			return packet;
 		}
 		
-		CommandPacket disconnect(){
+		public static CommandPacket disconnect(){
 			return new CommandPacket().setCommand(Command.DISCONNECT);
 		}
 	}
