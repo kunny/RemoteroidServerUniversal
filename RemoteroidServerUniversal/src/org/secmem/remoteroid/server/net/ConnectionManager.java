@@ -6,11 +6,11 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 import org.secmem.remoteroid.lib.net.CommandPacket;
-import org.secmem.remoteroid.lib.net.ImagePacket;
+import org.secmem.remoteroid.lib.net.ScreenPacket;
 import org.secmem.remoteroid.server.net.CommandReceiverThread.CommandStateListener;
 import org.secmem.remoteroid.server.net.ScreenReceiverThread.ScreenStateListener;
 
-public class ClientManager implements CommandStateListener, ScreenStateListener{
+public class ConnectionManager implements CommandStateListener, ScreenStateListener{
 	private static final Logger log = Logger.getLogger("ClientManager");
 	
 	public enum ConnectionState{NONE, WAITING_CONNECTION, CONNECTED};
@@ -22,7 +22,7 @@ public class ClientManager implements CommandStateListener, ScreenStateListener{
 	
 	private ClientStateListener listener;
 	
-	public ClientManager(ClientStateListener listener){
+	public ConnectionManager(ClientStateListener listener){
 		this.listener = listener;
 	}
 	
@@ -34,7 +34,7 @@ public class ClientManager implements CommandStateListener, ScreenStateListener{
 		return this.connState;
 	}
 	
-	public void waitClientConnection(){
+	public void waitClientCommandConnection(){
 		if(listener==null){
 			throw new IllegalStateException("Client state listener cannot be null!");
 		}
@@ -46,11 +46,8 @@ public class ClientManager implements CommandStateListener, ScreenStateListener{
 				log.info("Waiting client...(command)");
 				commandSocket = new ServerSocket(CommandPacket.SOCKET_PORT).accept();
 				
-				log.info("Waiting client...(screen)");
-				screenSocket = new ServerSocket(ImagePacket.SOCKET_PORT).accept();
+				new CommandReceiverThread(ConnectionManager.this).setSocket(commandSocket).run();
 				
-				new CommandReceiverThread(ClientManager.this).setSocket(commandSocket).run();
-				new ScreenReceiverThread(ClientManager.this).setSocket(screenSocket).run();
 				}catch(IOException e){
 					e.printStackTrace();
 					listener.onDisconnected();
@@ -58,6 +55,28 @@ public class ClientManager implements CommandStateListener, ScreenStateListener{
 			}
 		}).start();
 			
+	}
+	
+	public void waitClientScreenConnection(){
+		if(listener==null){
+			throw new IllegalStateException("Client state listener cannot be null!");
+		}
+		
+		new Thread(new Runnable(){
+			@Override
+			public void run(){
+				try{
+				log.info("Waiting client...(screen)");
+				screenSocket = new ServerSocket(ScreenPacket.SOCKET_PORT).accept();
+				
+				new ScreenReceiverThread(ConnectionManager.this).setSocket(screenSocket).run();
+				}catch(IOException e){
+					e.printStackTrace();
+					listener.onDisconnected();
+				}
+			}
+		}).start();
+					
 	}
 	
 	public void disconnect(){
@@ -89,7 +108,7 @@ public class ClientManager implements CommandStateListener, ScreenStateListener{
 
 	@Override
 	public void onScreenSocketLost() {
-		cleanup();
+		
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
 
@@ -218,45 +217,39 @@ public class WelcomeDialog extends Dialog {
 						throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(R.getString("login_in_progress"), IProgressMonitor.UNKNOWN);
-					try {
-						Account account = new Account();
-						account.setEmail(email);
-						account.setPassword(password);
-						
-						Request request = RequestBuilder.getRequest(API.Account.LOGIN).setPayload(account).build();
-						
-						final Response response = request.sendRequest();
-						
-						Display disp = getParent().getDisplay();
-						disp.syncExec(new Runnable(){
-							public void run(){
-								
-								if(response.isSucceed()){
-									// Set result to Account : User has logged-in.
-									result = (Account)response.getPayloadAsAccount();
-									shlWelcome.close();
-								}else{
-									switch(response.getErrorCode()){
-									case Codes.Error.Account.AUTH_FAILED:
-										MessageDialog.openError(shlWelcome, R.getString("login_failed"), R.getString("failed_to_authenticate_user"));
-										break;
-										
-									case Codes.Error.GENERAL:
-										MessageDialog.openError(shlWelcome, R.getString("login_failed"), R.getString("unexpected_error"));
-										break;
-									}
+				
+					Account account = new Account();
+					account.setEmail(email);
+					account.setPassword(password);
+					
+					Request request = Request.Builder.setRequest(API.Account.LOGIN).setPayload(account).build();
+					
+					final Response response = request.sendRequest();
+					
+					Display disp = getParent().getDisplay();
+					disp.syncExec(new Runnable(){
+						public void run(){
+							
+							if(response.isSucceed()){
+								// Set result to Account : User has logged-in.
+								result = (Account)response.getPayloadAsAccount();
+								shlWelcome.close();
+							}else{
+								switch(response.getErrorCode()){
+								case Codes.Error.Account.AUTH_FAILED:
+									MessageDialog.openError(shlWelcome, R.getString("login_failed"), R.getString("failed_to_authenticate_user"));
+									break;
 									
+								case Codes.Error.GENERAL:
+									MessageDialog.openError(shlWelcome, R.getString("login_failed"), R.getString("unexpected_error"));
+									break;
 								}
 								
 							}
-						});
+							
+						}
+					});
 						
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
 				}
 				
 			});

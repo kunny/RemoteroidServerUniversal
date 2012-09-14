@@ -25,7 +25,7 @@ import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.data.Device;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
+import org.secmem.remoteroid.lib.request.Request.Builder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
 
@@ -169,54 +169,47 @@ public class DeviceSelectionDialog extends Dialog {
 						throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(R.getString("fetching_device_list"), IProgressMonitor.UNKNOWN);
-					try {
-						Request request = RequestBuilder.getRequest(API.Device.LIST_DEVICE).setPayload(account).build();
-						
-						final Response response = request.sendRequest();
-						
-						Display disp = getParent().getDisplay();
-						disp.syncExec(new Runnable(){
-							public void run(){
+					
+					Request request = Request.Builder.setRequest(API.Device.LIST_DEVICE).setPayload(account).build();
+					
+					final Response response = request.sendRequest();
+					
+					Display disp = getParent().getDisplay();
+					disp.syncExec(new Runnable(){
+						public void run(){
+							
+							if(response.isSucceed()){
+								deviceList = response.getPayloadAsDeviceList();
+								int itemCnt = deviceList.size();
 								
-								if(response.isSucceed()){
-									deviceList = response.getPayloadAsDeviceList();
-									int itemCnt = deviceList.size();
+								tblDevices.setItemCount(0);
+								tblDevices.clearAll();
+								
+								for(int i=0; i<itemCnt; ++i){
+									Device dev = deviceList.get(i);
+									TableItem item = new TableItem(tblDevices, SWT.NULL, i);
+									item.setText(0, dev.getNickname());
+								}
+								
+							}else{
+								switch(response.getErrorCode()){
+								case Codes.Error.Account.AUTH_FAILED:
+									MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("failed_to_authenticate_user"));
+									break;
 									
-									tblDevices.setItemCount(0);
-									tblDevices.clearAll();
+								case Codes.Error.Device.DEVICE_NOT_FOUND:
+									MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("no_device_found"));
+									break;
 									
-									for(int i=0; i<itemCnt; ++i){
-										Device dev = deviceList.get(i);
-										TableItem item = new TableItem(tblDevices, SWT.NULL, i);
-										item.setText(0, dev.getNickname());
-									}
-									
-								}else{
-									switch(response.getErrorCode()){
-									case Codes.Error.Account.AUTH_FAILED:
-										MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("failed_to_authenticate_user"));
-										break;
-										
-									case Codes.Error.Device.DEVICE_NOT_FOUND:
-										MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("no_device_found"));
-										break;
-										
-									case Codes.Error.GENERAL:
-										MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("unexpected_error"));
-										break;
-									}
-									
+								case Codes.Error.GENERAL:
+									MessageDialog.openError(shlSelectDeviceTo, R.getString("failed_to_fetch_device_list"), R.getString("unexpected_error"));
+									break;
 								}
 								
 							}
-						});
-						
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
+							
+						}
+					});
 				}
 				
 			});

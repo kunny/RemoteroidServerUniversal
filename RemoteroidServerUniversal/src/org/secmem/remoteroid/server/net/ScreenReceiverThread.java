@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
-import org.secmem.remoteroid.lib.net.ImagePacket;
+import org.secmem.remoteroid.lib.net.ScreenPacket;
 
 
 public class ScreenReceiverThread extends Thread{
@@ -37,7 +37,7 @@ public class ScreenReceiverThread extends Thread{
 			
 			// Start listening data from client
 			while(true){
-				ImagePacket data = (ImagePacket)inStream.readObject();
+				ScreenPacket data = (ScreenPacket)inStream.readObject();
 				listener.onReceiveImageData(data.getImageBytes());
 			}
 		}catch(IOException e){

@@ -25,7 +25,6 @@ import org.secmem.remoteroid.lib.api.API;
 import org.secmem.remoteroid.lib.api.Codes;
 import org.secmem.remoteroid.lib.data.Account;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
 
@@ -159,44 +158,39 @@ public class RegisterDialog extends Dialog {
 								throws InvocationTargetException,
 								InterruptedException {
 							monitor.beginTask(R.getString("register_in_progress"), IProgressMonitor.UNKNOWN);
-							try {
-								Account account = new Account();
-								account.setEmail(email);
-								account.setPassword(pass);
-								
-								Request request = RequestBuilder.getRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
-								
-								final Response response = request.sendRequest();
-								
-								Display disp = getParent().getDisplay();
-								disp.syncExec(new Runnable(){
-									public void run(){
-										MessageBox messageBox = new MessageBox(shlRegister, SWT.ICON_INFORMATION | SWT.OK);
-										messageBox.setText(R.getString("remoteroid"));
-										if(response.isSucceed()){
-											messageBox.setMessage(R.getString("account_created"));
-											messageBox.open();
-											shlRegister.close();
-										}else{
-											switch(response.getErrorCode()){
-											case Codes.Error.Account.DUPLICATE_EMAIL:
-												messageBox.setMessage(R.getString("email_duplicated"));
-												break;
-												
-											case Codes.Error.GENERAL:
-												messageBox.setMessage(R.getString("failed_to_register"));
-												break;
-											}
-											messageBox.open();
+							
+							Account account = new Account();
+							account.setEmail(email);
+							account.setPassword(pass);
+							
+							Request request = Request.Builder.setRequest(API.Account.ADD_ACCOUNT).setPayload(account).build();
+							
+							final Response response = request.sendRequest();
+							
+							Display disp = getParent().getDisplay();
+							disp.syncExec(new Runnable(){
+								public void run(){
+									MessageBox messageBox = new MessageBox(shlRegister, SWT.ICON_INFORMATION | SWT.OK);
+									messageBox.setText(R.getString("remoteroid"));
+									if(response.isSucceed()){
+										messageBox.setMessage(R.getString("account_created"));
+										messageBox.open();
+										shlRegister.close();
+									}else{
+										switch(response.getErrorCode()){
+										case Codes.Error.Account.DUPLICATE_EMAIL:
+											messageBox.setMessage(R.getString("email_duplicated"));
+											break;
+											
+										case Codes.Error.GENERAL:
+											messageBox.setMessage(R.getString("failed_to_register"));
+											break;
 										}
+										messageBox.open();
 									}
-								});
-								
-							} catch (MalformedURLException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+								}
+							});
+							
 						}
 						
 					});

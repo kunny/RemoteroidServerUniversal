@@ -28,20 +28,19 @@ import org.secmem.remoteroid.lib.data.Device;
 import org.secmem.remoteroid.lib.data.WakeupMessage;
 import org.secmem.remoteroid.lib.net.CommandPacket;
 import org.secmem.remoteroid.lib.request.Request;
-import org.secmem.remoteroid.lib.request.Request.RequestBuilder;
 import org.secmem.remoteroid.lib.request.Response;
 import org.secmem.remoteroid.server.R;
-import org.secmem.remoteroid.server.net.ClientManager;
+import org.secmem.remoteroid.server.net.ConnectionManager;
 import org.secmem.remoteroid.server.ui.view.DeviceScreenCanvas;
 
-public class Main implements ClientManager.ClientStateListener{
+public class Main implements ConnectionManager.ClientStateListener{
 	
 	private static final Logger log = Logger.getLogger("Main");
 
 	protected Shell shell;
 	private DeviceScreenCanvas canvas;
 	
-	private static ClientManager clientManager;
+	private static ConnectionManager clientManager;
 	private Device currentDevice;
 	private Account currentAccount;
 	private String currentIpAddress;
@@ -72,7 +71,7 @@ public class Main implements ClientManager.ClientStateListener{
 		shell.open();
 		shell.layout();
 		
-		clientManager.waitClientConnection();
+		clientManager.waitClientCommandConnection();
 		
 		// Launch Welcome dialog
 		Object loginResult = new WelcomeDialog(shell, SWT.DEFAULT).open();
@@ -121,43 +120,36 @@ public class Main implements ClientManager.ClientStateListener{
 						throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(R.getString("fetching_device_list"), IProgressMonitor.UNKNOWN);
-					try {
-						WakeupMessage msg = new WakeupMessage();
-						msg.setDevice(currentDevice);
-						msg.setServerIpAddress(currentIpAddress);
-						
-						Request request = RequestBuilder.getRequest(API.Wakeup.WAKE_UP).setPayload(msg).build();
-						
-						final Response response = request.sendRequest();
-						
-						Display disp = Display.getCurrent();
-						disp.syncExec(new Runnable(){
-							public void run(){
+					
+					WakeupMessage msg = new WakeupMessage();
+					msg.setDevice(currentDevice);
+					msg.setServerIpAddress(currentIpAddress);
+					
+					Request request = Request.Builder.setRequest(API.Wakeup.WAKE_UP).setPayload(msg).build();
+					
+					final Response response = request.sendRequest();
+					
+					Display disp = Display.getCurrent();
+					disp.syncExec(new Runnable(){
+						public void run(){
+							
+							if(response.isSucceed()){
+								MessageDialog.openInformation(shell, R.getString("message_sent"),String.format(R.getString("connection_request_message_sent_to"), currentDevice.getNickname()));
+							}else{
+								switch(response.getErrorCode()){
+								case Codes.Error.Account.AUTH_FAILED:
+									MessageDialog.openError(shell, R.getString("error"), R.getString("failed_to_authenticate_user"));
+									break;
 								
-								if(response.isSucceed()){
-									MessageDialog.openInformation(shell, R.getString("message_sent"),String.format(R.getString("connection_request_message_sent_to"), currentDevice.getNickname()));
-								}else{
-									switch(response.getErrorCode()){
-									case Codes.Error.Account.AUTH_FAILED:
-										MessageDialog.openError(shell, R.getString("error"), R.getString("failed_to_authenticate_user"));
-										break;
-									
-									case Codes.Error.GENERAL:
-										MessageDialog.openError(shell, R.getString("error"), R.getString("unexpected_error"));
-										break;
-									}
-									
+								case Codes.Error.GENERAL:
+									MessageDialog.openError(shell, R.getString("error"), R.getString("unexpected_error"));
+									break;
 								}
 								
 							}
-						});
-						
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
+							
+						}
+					});
 				}
 				
 			});
@@ -231,7 +223,7 @@ public class Main implements ClientManager.ClientStateListener{
 			
 			shell.setMenuBar(generateMenuBar());
 			
-			clientManager = new ClientManager(this);
+			clientManager = new ConnectionManager(this);
 		}catch(IOException e){
 			e.printStackTrace();
 			shell.setText("Remoteroid - No connection");
